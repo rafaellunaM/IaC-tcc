@@ -43,12 +43,12 @@ kind: Ingress
 metadata:
   name: whoami-ingress
   annotations:
-    cert-manager.io/issuer: "letsencrypt-prod"
+    cert-manager.io/issuer: "letsencrypt-production"
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   ingressClassName: nginx
   rules:
-  - host:  test.471112921193.realhandsonlabs.net
+  - host:  test.654654489328.realhandsonlabs.net
     http:
       paths:
       - path: /
@@ -60,5 +60,5 @@ spec:
               number: 80
   tls:
   - hosts:
-    - test.471112921193.realhandsonlabs.net
-    secretName: nginx-example-tls
+    - test.654654489328.realhandsonlabs.net
+    secretName: nginx-cert-manager

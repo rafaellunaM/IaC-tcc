@@ -1,6 +1,6 @@
-# To Do
-* test ingress-nginx with tls
+## To Do
 * deployment hlf-ca
 
-# Start project
+## Start project
 * aws eks update-kubeconfig --region us-east-1 --name meu-cluster-eks
+* adjust route53 for ingress-domains

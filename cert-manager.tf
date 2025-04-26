@@ -16,3 +16,13 @@ resource "helm_release" "cert-manager" {
     null_resource.kubectl_apply
   ]
 }
+
+resource "null_resource" "letsencrypt" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/deployments/letsencrypt-production.yaml"
+  }
+  
+  depends_on = [
+    helm_release.cert-manager
+  ]
+}
