@@ -1,0 +1,2 @@
+meu-cluster-eks
+us-east-1

@@ -1,0 +1,4 @@
+# To Do
+* deploymente cert-manager
+* test ingress-nginx with tls
+* deployment hlf-ca
