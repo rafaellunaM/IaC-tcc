@@ -1,4 +1,6 @@
 # To Do
-* deploymente cert-manager
 * test ingress-nginx with tls
 * deployment hlf-ca
+
+# Start project
+* aws eks update-kubeconfig --region us-east-1 --name meu-cluster-eks
