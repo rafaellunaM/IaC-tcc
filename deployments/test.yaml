@@ -48,7 +48,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host:  test.654654489328.realhandsonlabs.net
+  - host:  test.452303021915.realhandsonlabs.net
     http:
       paths:
       - path: /
@@ -60,5 +60,9 @@ spec:
               number: 80
   tls:
   - hosts:
-    - test.654654489328.realhandsonlabs.net
+    - test.452303021915.realhandsonlabs.net
     secretName: nginx-cert-manager
+#
+#kubectl hlf ca create  --image=$CA_IMAGE --version=$CA_VERSION --storage-class=ebs-csi-sc --capacity=1Gi --name=org1-ca \
+#    --enroll-id=enroll --enroll-pw=enrollpw --hosts=org1-ca.localho.st --istio-port=443
+#

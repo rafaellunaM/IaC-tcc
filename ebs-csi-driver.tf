@@ -20,3 +20,18 @@ resource "helm_release" "ebs_csi_driver" {
     value = aws_iam_role.ebs_csi_irsa_role.arn
   }
 }
+
+resource "null_resource" "kubectl_apply_sc" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/deployments/sc"
+  }
+  depends_on = [ helm_release.ebs_csi_driver ]
+}
+
+resource "null_resource" "kubectl_apply_pvc" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/deployments/pvc"
+  }
+
+  depends_on = [ null_resource.kubectl_apply_sc ]
+}

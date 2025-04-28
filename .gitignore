@@ -1,3 +1,4 @@
 aws.env
 .terraform*
 terraform.*
+istio-1.23.3

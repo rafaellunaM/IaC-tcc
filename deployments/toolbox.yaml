@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ubuntu-deployment
+  labels:
+    app: ubuntu
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ubuntu
+  template:
+    metadata:
+      labels:
+        app: ubuntu
+    spec:
+      containers:
+      - name: ubuntu
+        image: ubuntu
+        command: ["sleep", "123456"]
+
+# kubectl create clusterrolebinding default-admin \
+#   --clusterrole=cluster-admin \
+#   --serviceaccount=default:default
+# install:
+# sudo apt install bash-completion
+# helm
+# awscli 2
+# kubectl
