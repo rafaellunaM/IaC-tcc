@@ -12,4 +12,3 @@ resource "local_file" "eks_info" {
   content =  join("\n", [aws_eks_cluster.eks_cluster.name, data.aws_region.current.name])
   filename = "eks_info.txt"
 }
-

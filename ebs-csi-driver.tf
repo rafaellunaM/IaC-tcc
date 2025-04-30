@@ -23,14 +23,14 @@ resource "helm_release" "ebs_csi_driver" {
 
 resource "null_resource" "kubectl_apply_sc" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/deployments/sc"
+    command = "kubectl apply -f ${path.module}/deployments/sc.yaml"
   }
   depends_on = [ helm_release.ebs_csi_driver ]
 }
 
 resource "null_resource" "kubectl_apply_pvc" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/deployments/pvc"
+    command = "kubectl apply -f ${path.module}/deployments/pvc.yaml"
   }
 
   depends_on = [ null_resource.kubectl_apply_sc ]

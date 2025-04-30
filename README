@@ -2,6 +2,8 @@
 * deployment hlf-ca
 
 ## Start project
+* rm terraform.tfstate # Because is deployment on the new account
+* terraform apply -auto-approve
 * aws eks update-kubeconfig --region us-east-1 --name meu-cluster-eks
 * kubectl apply -f deployments/toolbox.yaml
 * install on the toolbox bash-completion, helm, awscli 2, kubectl and you must export envs to aws cli (aws.env)

@@ -1,0 +1,205 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: install-tools
+data:
+  hlf.sh: |
+    #!/bin/bash
+    set -e
+
+    echo "clonando repositório" 
+    git clone https://github.com/hyperledger-bevel/bevel-operator-fabric.git
+
+    echo "instalando operator via helm"
+    helm repo add kfs https://kfsoftware.github.io/hlf-helm-charts --force-update
+    helm install hlf-operator --version=1.11.1 -- kfs/hlf-operator
+
+    echo "install krew"
+    (
+      set -x; cd "$(mktemp -d)" &&
+      OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+      ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" &&
+      KREW="krew-${OS}_${ARCH}" &&
+      curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+      tar zxvf "${KREW}.tar.gz" &&
+      ./"${KREW}" install krew
+    )
+    export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"
+    kubectl krew install hlf
+  
+    echo "install Istio"
+    curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.23.3 sh -
+
+    kubectl create namespace istio-system
+    export ISTIO_PATH=$(echo $PWD/istio-*/bin)
+    export PATH="$PATH:$ISTIO_PATH"
+    istioctl operator init
+    kubectl apply -f - <<EOF
+    apiVersion: install.istio.io/v1alpha1
+    kind: IstioOperator
+    metadata:
+      name: istio-gateway
+      namespace: istio-system
+    spec:
+      addonComponents:
+        grafana:
+          enabled: false
+        kiali:
+          enabled: false
+        prometheus:
+          enabled: false
+        tracing:
+          enabled: false
+      components:
+        ingressGateways:
+          - enabled: true
+            k8s:
+              hpaSpec:
+                minReplicas: 1
+              resources:
+                limits:
+                  cpu: 500m
+                  memory: 512Mi
+                requests:
+                  cpu: 100m
+                  memory: 128Mi
+              service:
+                ports:
+                  - name: http
+                    port: 80
+                    targetPort: 8080
+                    nodePort: 30949
+                  - name: https
+                    port: 443
+                    targetPort: 8443
+                    nodePort: 30950
+                type: NodePort
+            name: istio-ingressgateway
+        pilot:
+          enabled: true
+          k8s:
+            hpaSpec:
+              minReplicas: 1
+            resources:
+              limits:
+                cpu: 300m
+                memory: 512Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+      meshConfig:
+        accessLogFile: /dev/stdout
+        enableTracing: false
+        outboundTrafficPolicy:
+          mode: ALLOW_ANY
+      profile: default
+    EOF
+
+    echo "Configure Internal DNS"
+    kubectl apply -f - <<EOF
+    kind: ConfigMap
+    apiVersion: v1
+    metadata:
+      name: coredns
+      namespace: kube-system
+    data:
+      Corefile: |
+        .:53 {
+            errors
+            health {
+              lameduck 5s
+            }
+            rewrite name regex (.*)\.localho\.st istio-ingressgateway.istio-system.svc.cluster.local
+            hosts {
+              fallthrough
+            }
+            ready
+            kubernetes cluster.local in-addr.arpa ip6.arpa {
+              pods insecure
+              fallthrough in-addr.arpa ip6.arpa
+              ttl 30
+            }
+            prometheus :9153
+            forward . /etc/resolv.conf {
+              max_concurrent 1000
+            }
+            cache 30
+            loop
+            reload
+            loadbalance
+        }
+    EOF
+
+    echo "Apply environment Variables"
+    export PEER_IMAGE=hyperledger/fabric-peer
+    export PEER_VERSION=3.0.0
+
+    export ORDERER_IMAGE=hyperledger/fabric-orderer
+    export ORDERER_VERSION=3.0.0
+
+    export CA_IMAGE=hyperledger/fabric-ca
+    export CA_VERSION=1.5.13
+
+    export SC_NAME=ebs-csi-sc
+
+    echo "deploy HLF-CA"
+    kubectl hlf ca create  --image=$CA_IMAGE --version=$CA_VERSION --storage-class=ebs-csi-sc --capacity=1Gi --name=org1-ca \
+        --enroll-id=enroll --enroll-pw=enrollpw --hosts=org1-ca.localho.st --istio-port=443
+
+    kubectl hlf ca create  --image=$CA_IMAGE --version=$CA_VERSION --storage-class=ebs-csi-sc --capacity=1Gi --name=org2-ca \
+        --enroll-id=enroll --enroll-pw=enrollpw --hosts=org2-ca.localho.st --istio-port=443
+
+    kubectl hlf ca create  --image=$CA_IMAGE --version=$CA_VERSION --storage-class=ebs-csi-sc --capacity=1Gi --name=ord-ca \
+        --enroll-id=enroll --enroll-pw=enrollpw --hosts=ord-ca.localho.st --istio-port=443
+
+    echo "registrar usuário para  HLF-Peer"
+    kubectl hlf ca register --name=org1-ca --user=peer --secret=peerpw --type=peer --enroll-id enroll --enroll-secret=enrollpw --mspid Org1MSP
+    kubectl hlf ca register --name=org1-ca --user=peer2 --secret=peerpw --type=peer --enroll-id enroll --enroll-secret=enrollpw --mspid Org1MSP
+
+    kubectl hlf ca register --name=org2-ca --user=peer --secret=peerpw --type=peer --enroll-id enroll --enroll-secret=enrollpw --mspid Org2MSP
+    kubectl hlf ca register --name=org2-ca --user=peer2 --secret=peerpw --type=peer --enroll-id enroll --enroll-secret=enrollpw --mspid Org2MSP
+
+    echo "criar peers"
+    kubectl hlf peer create --statedb=leveldb --image=$PEER_IMAGE --version=$PEER_VERSION --storage-class=$SC_NAME --enroll-id=peer --mspid=Org1MSP \
+        --enroll-pw=peerpw --capacity=5Gi --name=org1-peer0 --ca-name=org1-ca.default \
+        --hosts=peer0-org1.localho.st --istio-port=443
+    kubectl hlf peer create --statedb=leveldb --image=$PEER_IMAGE --version=$PEER_VERSION --storage-class=$SC_NAME --enroll-id=peer2 --mspid=Org1MSP \
+        --enroll-pw=peerpw --capacity=5Gi --name=org1-peer2 --ca-name=org1-ca.default \
+        --hosts=peer2-org1.localho.st --istio-port=443
+
+    kubectl hlf peer create --statedb=leveldb --image=$PEER_IMAGE --version=$PEER_VERSION --storage-class=$SC_NAME --enroll-id=peer --mspid=Org2MSP \
+        --enroll-pw=peerpw --capacity=5Gi --name=org2-peer0 --ca-name=org2-ca.default \
+        --hosts=peer0-org2.localho.st --istio-port=443
+
+    kubectl hlf peer create --statedb=leveldb --image=$PEER_IMAGE --version=$PEER_VERSION --storage-class=$SC_NAME --enroll-id=peer2 --mspid=Org2MSP \
+        --enroll-pw=peerpw --capacity=5Gi --name=org2-peer2 --ca-name=org2-ca.default \
+        --hosts=peer2-org2.localho.st --istio-port=443
+
+    echo "registrar usuário do order"
+    kubectl hlf ca register --name=ord-ca --user=orderer --secret=ordererpw \
+        --type=orderer --enroll-id enroll --enroll-secret=enrollpw --mspid=OrdererMSP --ca-url="https://ord-ca.localho.st:443"
+
+    echo "Deploy orderer"
+    kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
+        --storage-class=$SC_NAME --enroll-id=orderer --mspid=OrdererMSP \
+        --enroll-pw=ordererpw --capacity=2Gi --name=ord-node1 --ca-name=ord-ca.default \
+        --hosts=orderer0-ord.localho.st --admin-hosts=admin-orderer0-ord.localho.st --istio-port=443
+
+
+    kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
+        --storage-class=$SC_NAME --enroll-id=orderer --mspid=OrdererMSP \
+        --enroll-pw=ordererpw --capacity=2Gi --name=ord-node2 --ca-name=ord-ca.default \
+        --hosts=orderer1-ord.localho.st --admin-hosts=admin-orderer1-ord.localho.st --istio-port=443
+
+
+    kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
+        --storage-class=$SC_NAME --enroll-id=orderer --mspid=OrdererMSP \
+        --enroll-pw=ordererpw --capacity=2Gi --name=ord-node3 --ca-name=ord-ca.default \
+        --hosts=orderer2-ord.localho.st --admin-hosts=admin-orderer2-ord.localho.st --istio-port=443
+
+
+    kubectl hlf ordnode create --image=$ORDERER_IMAGE --version=$ORDERER_VERSION \
+        --storage-class=$SC_NAME --enroll-id=orderer --mspid=OrdererMSP \
+        --enroll-pw=ordererpw --capacity=2Gi --name=ord-node4 --ca-name=ord-ca.default \
+        --hosts=orderer3-ord.localho.st --admin-hosts=admin-orderer3-ord.localho.st --istio-port=443
+

@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: install-tools
+data:
+  script.sh: |
+    #!/bin/bash
+    set -e
+
+    echo "Instalando bash-completion..."
+    apt-get update && apt-get install -y bash-completion
+    
+    echo "Instalando curl..."
+    apt install curl -y
+
+    echo "Instalando Helm..."
+    curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+    chmod 700 get_helm.sh
+    ./get_helm.sh
+
+    echo "Instalando AWS CLI v2..."
+    apt-get install -y unzip
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    unzip awscliv2.zip
+    ./aws/install
+    rm -rf aws awscliv2.zip
+
+    echo "Instalando kubectl..."
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+    rm kubectl
+
+    echo "configurando eks..."
+    export AWS_ACCESS_KEY_ID=$(cat aws-vars/AWS_ACCESS_KEY_ID)
+    export AWS_SECRET_ACCESS_KEY=$(cat aws-vars/AWS_SECRET_ACCESS_KEY)
+    aws eks update-kubeconfig --region us-east-1 --name meu-cluster-eks
+
+    echo "instalando git"
+    apt install git -y
+
+    echo "instalando vim"
+    apt install vim -y

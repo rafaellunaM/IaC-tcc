@@ -17,13 +17,18 @@ spec:
       containers:
       - name: ubuntu
         image: ubuntu
-        command: ["sleep", "123456"]
-
-# kubectl create clusterrolebinding default-admin \
-#   --clusterrole=cluster-admin \
-#   --serviceaccount=default:default
-# install:
-# sudo apt install bash-completion
-# helm
-# awscli 2
-# kubectl
+        command: ["sh", "-c", "echo 'Container started'; sleep infinity"]
+        volumeMounts:
+          - name: script-volume
+            mountPath: /scripts
+            readOnly: true
+          - name: aws-env-volume
+            mountPath: /aws-vars
+            readOnly: true
+      volumes:
+        - name: script-volume
+          configMap:
+            name: install-tools
+        - name: aws-env-volume
+          configMap:
+            name: aws-env
