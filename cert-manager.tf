@@ -2,6 +2,9 @@ resource "null_resource" "kubectl_apply" {
   provisioner "local-exec" {
     command = "kubectl apply -f ${path.module}/cert-manager-crds.yaml"
   }
+    depends_on = [
+    aws_eks_cluster.eks_cluster
+  ]
 }
 
 resource "helm_release" "cert-manager" {

@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: install-tools
 data:
-  script.sh: |
+  install-tools.sh: |
     #!/bin/bash
     set -e
 

@@ -12,6 +12,13 @@ resource "null_resource" "configmap_install_tools" {
   depends_on = [ null_resource.configmap_aws_env ]
 }
 
+resource "null_resource" "configmap_install_hlf" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/deployments/install-hlf.yaml"
+  }
+  depends_on = [ null_resource.configmap_install_tools ]
+}
+
 resource "null_resource" "install_toolbox" {
   provisioner "local-exec" {
     command = "kubectl apply -f ${path.module}/deployments/toolbox.yaml"
