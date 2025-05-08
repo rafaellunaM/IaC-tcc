@@ -1,19 +1,17 @@
 resource "null_resource" "kubectl_apply" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/cert-manager-crds.yaml"
+    # remeber to adjust this command to fild correct after create terraform modules
+    command = "kubectl apply -f ${path.module}/${var.crtm.cert_manager_crd}"
   }
-    depends_on = [
-    aws_eks_cluster.eks_cluster
-  ]
 }
 
 resource "helm_release" "cert-manager" {
-  name             = "cert-manager"
-  repository       = "https://charts.jetstack.io"
-  chart            = "cert-manager"
-  namespace        = "cert-manager"
+  name             = var.crtm.cert_manager_name
+  repository       = var.crtm.cert_manager_repository
+  chart            = var.crtm.cert_manager_chart
+  namespace        = var.crtm.cert_manager_namespace
   create_namespace = true
-  version          = "1.17.2"
+  version          = var.crtm.cert_manager_version
 
   depends_on = [
     null_resource.kubectl_apply
@@ -22,7 +20,8 @@ resource "helm_release" "cert-manager" {
 
 resource "null_resource" "letsencrypt" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/deployments/letsencrypt-production.yaml"
+    # remeber to adjust this command to fild correct after create terraform modules
+    command = "kubectl apply -f ${path.module}/deploymnts/${var.crtm.cert_manager_letsencrypt}"
   }
   
   depends_on = [

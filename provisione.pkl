@@ -1,0 +1,46 @@
+// Set values for eks: cluster name, scalling, node group name and instace type to eks cluster
+ 
+eks {
+cluster_name = "HLF_eks"
+node_group_name = "HLF_group"
+}
+
+// default values for cert-manager
+// scaling_config_desired_size = 5
+// calling_cluster_max = 5
+// scalling_cluster_min = 5
+// instance_types = t3.medium
+// Set values for cert-manager: crd.yaml, name, repository, version, chart, namespace and create namespace
+
+crtm {
+    cert_manager_crd = "cert-manager-crds.yam"
+    cert_manager_repository = "https://charts.jetstack.io"
+    cert_manager_chart = "cert-manager"
+    cert_manager_version = "1.17.2"
+    cert_manager_letsencrypt = "letsencrypt-production.yaml"
+}
+
+// default values for cert-manager
+// cert_manager_name = cert-manager
+// cert_manager_namespace = cert-manager
+// cert_manager_create_namespace = true
+// Set values for ingress-nginx name, repository, version, chart, namespace and create namespace
+
+nginx {
+    nginx_repository = "https://kubernetes.github.io/ingress-nginx"
+    nginx_chart = "ingress-nginx"
+    nginx_version = "4.10.0"
+}
+
+// default values for ebs
+// ebs_name = aws-ebs-csi-driver
+// ebs_namespace = kube-system
+// ebs_sc_default_file = sc.yaml
+// ebs_pvc_default_file = pvc.yaml
+ebs {
+    ebs_repository = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
+    ebs_chart = "aws-ebs-csi-driver"
+    ebs_version = "2.42.0"
+}
+
+

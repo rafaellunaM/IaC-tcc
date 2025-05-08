@@ -1,9 +1,9 @@
 resource "helm_release" "ebs_csi_driver" {
-  name       = "aws-ebs-csi-driver"
-  repository = "https://kubernetes-sigs.github.io/aws-ebs-csi-driver"
-  chart      = "aws-ebs-csi-driver"
-  namespace  = "kube-system"
-  version    = "2.42.0"
+  name       = var.ebs.ebs_name
+  repository = var.ebs.ebs_repository
+  chart      = var.ebs.ebs_chart
+  namespace  = var.ebs.ebs_namespace
+  version    = var.ebs.ebs_version
 
   set {
     name  = "controller.serviceAccount.create"
@@ -23,14 +23,14 @@ resource "helm_release" "ebs_csi_driver" {
 
 resource "null_resource" "kubectl_apply_sc" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/deployments/sc.yaml"
+    command = "kubectl apply -f ${path.module}/deployments/${var.ebs.ebs_sc_default_file}"
   }
   depends_on = [ helm_release.ebs_csi_driver ]
 }
 
 resource "null_resource" "kubectl_apply_pvc" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/deployments/pvc.yaml"
+    command = "kubectl apply -f ${path.module}/deployments/${var.ebs.ebs_pvc_default_file}"
   }
 
   depends_on = [ null_resource.kubectl_apply_sc ]
