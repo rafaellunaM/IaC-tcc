@@ -1,9 +1,13 @@
+locals {
+  ebs   = var.config[0].ebs
+}
+
 resource "helm_release" "ebs_csi_driver" {
-  name       = var.ebs.ebs_name
-  repository = var.ebs.ebs_repository
-  chart      = var.ebs.ebs_chart
-  namespace  = var.ebs.ebs_namespace
-  version    = var.ebs.ebs_version
+  name       = local.ebs.ebs_name
+  repository = local.ebs.ebs_repository
+  chart      = local.ebs.ebs_chart
+  namespace  = local.ebs.ebs_namespace
+  version    = local.ebs.ebs_version
 
   set {
     name  = "controller.serviceAccount.create"
@@ -23,14 +27,14 @@ resource "helm_release" "ebs_csi_driver" {
 
 resource "null_resource" "kubectl_apply_sc" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/deployments/${var.ebs.ebs_sc_default_file}"
+    command = "kubectl apply -f ${path.module}/deployments/${local.ebs.ebs_sc_default_file}"
   }
   depends_on = [ helm_release.ebs_csi_driver ]
 }
 
 resource "null_resource" "kubectl_apply_pvc" {
   provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/deployments/${var.ebs.ebs_pvc_default_file}"
+    command = "kubectl apply -f ${path.module}/deployments/${local.ebs.ebs_pvc_default_file}"
   }
 
   depends_on = [ null_resource.kubectl_apply_sc ]

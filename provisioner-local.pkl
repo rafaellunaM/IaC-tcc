@@ -1,0 +1,7 @@
+module provisioner_local
+
+typealias local_name  = "ansible"
+
+class Local_provisioner{
+    name: local_name 
+}

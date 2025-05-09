@@ -1,8 +1,12 @@
+locals {
+  nginx   = var.config[0].nginx
+}
+
 resource "helm_release" "ingress-nginx" {
-  name             = var.nginx.nginx_name
-  repository       = var.nginx.nginx_repository
-  chart            = var.nginx.nginx_chart
-  namespace        = var.nginx.nginx_namespace
-  create_namespace = var.nginx.nginx_create_namespace
-  version          = var.nginx.nginx_version
+  name             = local.nginx.nginx_name
+  repository       = local.nginx.nginx_repository
+  chart            = local.nginx.nginx_chart
+  namespace        = local.nginx.nginx_namespace
+  create_namespace = local.nginx.nginx_create_namespace
+  version          = local.nginx.nginx_version
 }

@@ -1,2 +1,2 @@
-meu-cluster-eks
+HLF_eks
 us-east-1

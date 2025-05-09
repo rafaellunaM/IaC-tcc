@@ -1,0 +1,20 @@
+module Environment
+
+import "./provisioner-aws.pkl" as _aws
+import "./provisioner-local.pkl" as _local
+
+typealias env_cluster = "aws"|"local"
+
+enabled: env_cluster = read("env:env_cluster")
+
+hidden aws: _aws.Aws_provisioner
+hidden ansible: _local.Local_provisioner
+
+config {
+    when (enabled == "aws") {
+        aws
+    }
+    when (enabled == "local"){
+        ansible
+    }
+}

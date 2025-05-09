@@ -1,10 +1,11 @@
 locals {
   access_aws = chomp(regex("AWS_ACCESS_KEY_ID=(.*)", file("aws.env"))[0])
   secret_aws = chomp(regex("AWS_SECRET_ACCESS_KEY=(.*)", file("aws.env"))[0])
+//  region   = var.config[0].eks.region
 }
 
 provider "aws" {
-  region     = "us-east-1"
+  region     = local.eks.region
   access_key = local.access_aws
   secret_key = local.secret_aws
 }
