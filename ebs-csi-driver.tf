@@ -25,17 +25,74 @@ resource "helm_release" "ebs_csi_driver" {
   }
 }
 
-resource "null_resource" "kubectl_apply_sc" {
-  provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/deployments/${local.ebs.ebs_sc_default_file}"
-  }
-  depends_on = [ helm_release.ebs_csi_driver ]
+resource "kubectl_manifest" "create_sc" {
+  yaml_body = <<YAML
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ebs-csi-sc
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp2
+reclaimPolicy: Delete
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+YAML
+depends_on = [ helm_release.ebs_csi_driver ]
 }
 
-resource "null_resource" "kubectl_apply_pvc" {
-  provisioner "local-exec" {
-    command = "kubectl apply -f ${path.module}/deployments/${local.ebs.ebs_pvc_default_file}"
-  }
-
-  depends_on = [ null_resource.kubectl_apply_sc ]
+resource "kubectl_manifest" "create_pvc" {
+  yaml_body = <<YAML
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ebs-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ebs-csi-sc
+  resources:
+    requests:
+      storage: 5Gi
+YAML
+depends_on = [ kubectl_manifest.create_sc ]
 }
+
+# resource "kubernetes_manifest" "create_sc" {
+#   manifest = {
+#     apiVersion = "storage.k8s.io/v1"
+#     kind = "StorageClass"
+#     metadata = {
+#       name = "ebs-csi-sc"
+#     }
+#     provisioner = "ebs.csi.aws.com"
+#     parameters = {
+#       type = "gp2"
+#     }
+#     reclaimPolicy = "Delete"
+#     volumeBindingMode = "WaitForFirstConsumer"
+#     allowVolumeExpansion = true
+#   }
+#   depends_on = [ helm_release.ebs_csi_driver ]
+# }
+
+# resource "kubernetes_manifest" "create_pvc" {
+#   manifest = {
+#     apiVersion = "v1"
+#     kind = "PersistentVolumeClaim"
+#     metadata = {
+#       name = "ebs-pvc"
+#       namespace = "default"
+#     }
+#     spec = {
+#       accessModes = ["ReadWriteOnce"]
+#       storageClassName = "ebs-csi-sc"
+#       resources = {
+#         requests = {
+#           storage = "5Gi"
+#         } 
+#       }
+#     }
+#   }
+#   depends_on = [ kubernetes_manifest.create_sc ]
+# }

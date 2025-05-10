@@ -5,10 +5,24 @@ import "./provisioner-local.pkl" as _local
 
 typealias env_cluster = "aws"|"local"
 
-enabled: env_cluster = read("env:env_cluster")
+hidden enabled: env_cluster = read("env:env_cluster")
 
-hidden aws: _aws.Aws_provisioner
-hidden ansible: _local.Local_provisioner
+hidden ansible:  _local.Local_provisioner
+hidden aws: _aws.Aws_provisioner = new { 
+    // ref: ./provisioner-aws.pkl
+    // eks = new { 
+    //     cluster_name = "example"
+    // }
+    // crtm = new {
+    //     cert_manager_crd = "example"
+    // }
+    // nginx = new {
+    //     nginx_repository = "example"
+    // }
+    // ebs = new {
+    //     ebs_repository =  "example"
+    // }
+}
 
 config {
     when (enabled == "aws") {

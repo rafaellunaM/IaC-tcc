@@ -2,13 +2,6 @@ locals {
   crtm   = var.config[0].crtm
 }
 
-resource "null_resource" "kubectl_apply_crd" {
-  provisioner "local-exec" {
-    # remeber to adjust this command to fild correct after create terraform modules
-    command = "kubectl apply -f ${path.module}/${local.crtm.cert_manager_crd}"
-  }
-}
-
 resource "helm_release" "cert-manager" {
   name             = local.crtm.cert_manager_name
   repository       = local.crtm.cert_manager_repository
@@ -17,18 +10,57 @@ resource "helm_release" "cert-manager" {
   create_namespace = true
   version          = local.crtm.cert_manager_version
 
-  depends_on = [
-    null_resource.kubectl_apply_crd
-  ]
+  set {
+    name  = "installCRDs"
+    value = "true"
+  }
 }
 
-resource "null_resource" "letsencrypt" {
-  provisioner "local-exec" {
-    # remeber to adjust this command to fild correct after create terraform modules
-    command = "kubectl apply -f ${path.module}/deploymnts/${local.crtm.cert_manager_letsencrypt}"
-  }
-  
-  depends_on = [
-    helm_release.cert-manager
-  ]
+resource "kubectl_manifest" "letsencrypt_issuer" {
+  yaml_body = <<YAML
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt-production
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: rafael@gmail.com
+    privateKeySecretRef:
+      name: letsencrypt-production
+    solvers:
+      - http01:
+          ingress:
+            class: nginx
+YAML
+depends_on = [ helm_release.cert-manager ]
 }
+
+  # manifest = {
+  #   apiVersion = "cert-manager.io/v1"
+  #   kind       = "Issuer"
+  #   metadata = {
+  #     name      = "letsencrypt-production"
+  #     namespace = "cert-manager"
+  #   }
+  #   spec = {
+  #     acme = {
+  #       server = "https://acme-v02.api.letsencrypt.org/directory"
+  #       email  = "rafael@gmail.com"
+  #       privateKeySecretRef = {
+  #         name = "letsencrypt-production"
+  #       }
+  #       solvers = [
+  #         {
+  #           http01 = {
+  #             ingress = {
+  #               class = "nginx"
+  #             }
+  #           }
+  #         }
+  #       ]
+  #     }
+  #   }
+  # }
+  # depends_on = [ helm_release.cert-manager ]
+
