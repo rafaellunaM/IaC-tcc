@@ -1,14 +1,13 @@
-creat_values:
-	@if [ -f ./aws.env ]; then \
-		pkl eval --env-var env_cluster=aws -f json cluster-environment.pkl > terraform.tfvars.json; \
-		echo "create terraform.tfvars.json"; \
-	else \
-		echo "Not found aws.env with AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"; \
-		exit 1; \
-	fi
+AWS_MAKEFILE = make -C terraform -f Makefile
 
-aws_provider: creat_values
-	terraform apply -auto-approve
+aws_render: 
+	pkl eval --env-var env_cluster=aws -f json config/cluster-environment.pkl > config/terraform.tfvars.json;
+
+aws_apply:
+	${AWS_MAKEFILE} aws_provider
+
+aws_plan:
+	${AWS_MAKEFILE} aws_plan
 
 local_provider:
-	pkl eval --env-var env_cluster=local -f json cluster-environment.pkl > terraform.tfvars.json; \
+	pkl eval --env-var env_cluster=local -f json config/cluster-environment.pkl > config/terraform.tfvars.json; \
