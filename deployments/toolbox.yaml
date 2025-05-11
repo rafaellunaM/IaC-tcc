@@ -33,8 +33,8 @@ spec:
           configMap:
             name: install-tools
         - name: aws-env-volume
-          configMap:
-            name: aws-env
+          secret:
+            secretName: aws-env
         - name: hlf-volume
           configMap:
             name: install-hlf

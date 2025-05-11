@@ -8,7 +8,6 @@ creat_values:
 	fi
 
 aws_provider: creat_values
-	terraform apply -auto-approve --target=aws_eks_node_group.eks_nodes[0]
 	terraform apply -auto-approve
 
 local_provider:

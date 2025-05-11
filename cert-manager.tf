@@ -35,32 +35,3 @@ spec:
 YAML
 depends_on = [ helm_release.cert-manager ]
 }
-
-  # manifest = {
-  #   apiVersion = "cert-manager.io/v1"
-  #   kind       = "Issuer"
-  #   metadata = {
-  #     name      = "letsencrypt-production"
-  #     namespace = "cert-manager"
-  #   }
-  #   spec = {
-  #     acme = {
-  #       server = "https://acme-v02.api.letsencrypt.org/directory"
-  #       email  = "rafael@gmail.com"
-  #       privateKeySecretRef = {
-  #         name = "letsencrypt-production"
-  #       }
-  #       solvers = [
-  #         {
-  #           http01 = {
-  #             ingress = {
-  #               class = "nginx"
-  #             }
-  #           }
-  #         }
-  #       ]
-  #     }
-  #   }
-  # }
-  # depends_on = [ helm_release.cert-manager ]
-

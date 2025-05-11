@@ -1,48 +1,55 @@
-#   provisioner "local-exec" {
-#     command = "kubectl create configmap aws-env --from-env-file=aws.env"
-#   }
-#   depends_on = [ helm_release.cert-manager ]
-# }
+resource "kubernetes_secret" "aws_credentials" {
+  metadata {
+    name = "aws-env"
+  }
+  data = {
+    AWS_ACCESS_KEY_ID   = local.access_aws 
+    AWS_SECRET_ACCESS_KEY  = local.secret_aws
+    EKS_CLUSTER_NAME = local.eks.cluster_name
+    EKS_REGION = local.eks.region
+  }
+}
 
-# resource "kubectl_manifest" "configmap_aws_env" {
-#   yaml_body = <<YAML
-# apiVersion: v1
-# kind: ConfigMap
-# metadata:
-#   name: aws-env
-#   namespace: default
-# data:
-#   aws.env: |
-# ${indent(4, file("${path.module}/aws.env"))}
-# YAML
-# }
+resource "kubernetes_config_map" "install_tools" {
+  metadata {
+    name = "install-tools"
+  }
+  data = {
+    "install-tools.sh" = "${file("${path.module}/deployments/install-tools.yaml")}"
+  }
+  depends_on = [ kubernetes_secret.aws_credentials ]
+}
 
+resource "kubernetes_config_map" "install_HLF" {
+  metadata {
+    name = "install-hlf"
+  }
+  data = {
+    "tools-hlf.sh" = "${file("${path.module}/deployments/install-hlf.yaml")}"
+  }
+  depends_on = [ kubernetes_config_map.install_tools ]
+}
 
-     
-# resource "null_resource" "configmap_install_tools" {
-#   provisioner "local-exec" {
-#     command = "kubectl apply -f ${path.module}/deployments/install-tools.yaml"
-#   }
-#   depends_on = [ kubectl_manifest.configmap_aws_env ]
-# }
+resource "kubectl_manifest" "toolbox_container" {
+  yaml_body =  "${file("${path.module}/deployments/toolbox.yaml")}"
+  depends_on = [ kubernetes_config_map.install_HLF ]
+}
 
-# resource "null_resource" "configmap_install_hlf" {
-#   provisioner "local-exec" {
-#     command = "kubectl apply -f ${path.module}/deployments/install-hlf.yaml"
-#   }
-#   depends_on = [ null_resource.configmap_install_tools ]
-# }
+# Service account to test environment, Is necessary createe other service account with specific roles
+resource "kubernetes_cluster_role_binding" "default_admin" {
+  metadata {
+    name = "default-admin"
+  }
 
-# resource "null_resource" "install_toolbox" {
-#   provisioner "local-exec" {
-#     command = "kubectl apply -f ${path.module}/deployments/toolbox.yaml"
-#   }
-#   depends_on = [ null_resource.configmap_install_tools ]
-# }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = "cluster-admin"
+  }
 
-# resource "null_resource" "clusterrolebinding" {
-#   provisioner "local-exec" {
-#     command = "kubectl create clusterrolebinding default-admin --clusterrole=cluster-admin --serviceaccount=default:default"
-#   }
-#   depends_on = [ null_resource.install_toolbox ]
-# }
+  subject {
+    kind      = "ServiceAccount"
+    name      = "default"
+    namespace = "default"
+  }
+}
