@@ -60,3 +60,11 @@ module "ingress" {
   source = "./modules/ingress"
   config = var.config
 }
+
+module "deployments" {
+  source = "./modules/deployments"
+  config = var.config
+  providers = {
+    kubectl = kubectl.gavinbunney
+  }
+}

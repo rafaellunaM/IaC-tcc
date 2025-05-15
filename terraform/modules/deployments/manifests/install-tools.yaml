@@ -10,6 +10,10 @@ data:
     apt-get update && apt-get install -y bash-completion
     echo "install curl"
     apt install curl -y
+    echo "install git"
+    apt install git -y
+    echo "install vim"
+    apt install vim -y
     echo "install Helm"
     curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
     chmod 700 get_helm.sh
@@ -35,7 +39,3 @@ data:
     EOF
 
     aws eks update-kubeconfig --region $(cat aws-vars/EKS_REGION) --name $(cat aws-vars/EKS_CLUSTER_NAME)
-    echo "install git"
-    apt install git -y
-    echo "install vim"
-    apt install vim -y
