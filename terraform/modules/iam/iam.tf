@@ -38,7 +38,8 @@ resource "aws_iam_role_policy_attachment" "eks_node_policies" {
 resource "aws_iam_openid_connect_provider" "eks" {
   client_id_list = ["sts.amazonaws.com"]
   thumbprint_list = ["9e99a48a9960b14926bb7f3b02e22da0a82b82a5"]
-  url = data.aws_eks_cluster.eks_cluster.identity.0.oidc.0.issuer
+  url = var.cluster_identity_oidc
+  # data.aws_eks_cluster.eks_cluster.identity.0.oidc.0.issuer
 }
 
 resource "aws_iam_role" "ebs_csi_irsa_role" {

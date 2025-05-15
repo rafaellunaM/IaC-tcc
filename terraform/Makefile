@@ -7,10 +7,14 @@ create_values:
 		exit 1; \
 	fi
 
-aws_provider: create_values
+aws_render:
+	pkl eval --env-var env_cluster=aws -f json ../config/cluster-environment.pkl > ../config/terraform.tfvars.json;
+
+aws_apply: create_values
 	terraform init
 	terraform apply -auto-approve -var-file=../config/terraform.tfvars.json
 
 aws_plan: create_values
-	terraform init
-	terraform plan -var-file=../config/terraform.tfvars.json
+	terraform init 
+	terraform	plan -var-file=../config/terraform.tfvars.json
+

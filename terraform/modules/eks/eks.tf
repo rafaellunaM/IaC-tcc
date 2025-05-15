@@ -4,22 +4,23 @@ locals {
 
 resource "aws_eks_cluster" "eks_cluster" {
   name     = local.eks.cluster_name
-  role_arn = aws_iam_role.eks_cluster_role.arn
+  role_arn = var.eks_cluster_role_arn
 
   vpc_config {
-    subnet_ids = aws_subnet.eks[*].id
+    subnet_ids = var.subnet_ids
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.eks_cluster_policy
+    var.dependency_eks_cluster_policy_attachment
   ]
+
 }
 
 resource "aws_eks_node_group" "eks_nodes" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
   node_group_name = local.eks.node_group_name
-  node_role_arn   = aws_iam_role.eks_node_role.arn
-  subnet_ids      = aws_subnet.eks[*].id
+  node_role_arn   = var.eks_node_role_arn
+  subnet_ids      = var.subnet_ids
 
   scaling_config {
     desired_size = local.eks.scaling_config_desired_size
@@ -30,7 +31,7 @@ resource "aws_eks_node_group" "eks_nodes" {
   instance_types = [local.eks.instance_types]
 
   depends_on = [
-    aws_iam_role_policy_attachment.eks_node_policies
+    var.dependency_eks_cluster_policy_attachment
   ]
 }
 

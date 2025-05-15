@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    kubectl = {
+      source = "gavinbunney/kubectl"
+    }
+  }
+}
+
 locals {
   ebs   = var.config[0].ebs
 }
@@ -21,7 +29,7 @@ resource "helm_release" "ebs_csi_driver" {
 
   set {
     name  = "controller.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-    value = aws_iam_role.ebs_csi_irsa_role.arn
+    value = var.ebs_csi_irsa_role_arn
   }
 }
 

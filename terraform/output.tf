@@ -1,5 +1,5 @@
 output "cluster_name" {
-  value = aws_eks_cluster.eks_cluster.name
+  value =  var.config[0].eks.cluster_name
   description = "The name of the created EKS cluster."
 }
 
@@ -9,6 +9,6 @@ output "region" {
 }
 
 resource "local_file" "eks_info" {
-  content =  join("\n", [aws_eks_cluster.eks_cluster.name, data.aws_region.current.name])
+  content =  join("\n", [ var.config[0].eks.cluster_name, data.aws_region.current.name])
   filename = "eks_info.txt"
 }

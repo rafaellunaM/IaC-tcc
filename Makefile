@@ -1,10 +1,10 @@
 AWS_MAKEFILE = make -C terraform -f Makefile
 
 aws_render: 
-	pkl eval --env-var env_cluster=aws -f json config/cluster-environment.pkl > config/terraform.tfvars.json;
+	$(AWS_MAKEFILE) aws_render
 
 aws_apply:
-	${AWS_MAKEFILE} aws_provider
+	${AWS_MAKEFILE} aws_apply
 
 aws_plan:
 	${AWS_MAKEFILE} aws_plan
