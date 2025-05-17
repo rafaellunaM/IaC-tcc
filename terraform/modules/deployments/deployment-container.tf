@@ -13,6 +13,16 @@ locals {
   eks_region = var.config[0].eks.region
 }
 
+# TO DO: Parametrize this resource
+resource "helm_release" "hlf_chart" {
+  name             = "kfs"
+  repository       = "https://kfsoftware.github.io/hlf-helm-charts"
+  chart            = "hlf-operator"
+  namespace        = "default"
+  create_namespace = false
+  version          = "1.11.1"
+}
+
 resource "kubernetes_secret" "aws_credentials" {
   metadata {
     name = "aws-env"
@@ -25,12 +35,27 @@ resource "kubernetes_secret" "aws_credentials" {
   }
 }
 
+resource "kubernetes_secret" "config_hlf_env" {
+  metadata {
+    name = "config-hlf-env"
+  }
+  data = {  
+    PEER_IMAGE = "hyperledger/fabric-peer"
+    PEER_VERSION = "3.0.0"
+    ORDERER_IMAGE = "hyperledger/fabric-orderer"
+    ORDERER_VERSION = "3.0.0"
+    CA_IMAGE = "hyperledger/fabric-ca"
+    CA_VERSION = "1.5.13"
+    SC_NAME="ebs-csi-sc"
+  }
+}
+
 resource "kubernetes_config_map" "install_tools" {
   metadata {
     name = "install-tools"
   }
   data = {
-    "install-tools.sh" = "${file("${path.module}/manifests/install-tools.yaml")}"
+    "install-tools.sh" = "${file("${path.module}/scripts/install-tools.sh")}"
   }
   depends_on = [ kubernetes_secret.aws_credentials ]
 }
@@ -40,7 +65,14 @@ resource "kubernetes_config_map" "install_HLF" {
     name = "install-hlf"
   }
   data = {
-    "tools-hlf.sh" = "${file("${path.module}/manifests/install-hlf.yaml")}"
+    "hlf-operator.sh" = "${file("${path.module}/scripts/hlf-operator.sh")}"
+    "config-coreDns.sh" = "${file("${path.module}/scripts/config-coreDns.sh")}"
+    "create-CAs.sh" = "${file("${path.module}/scripts/create-CAs.sh")}"
+    "deploy-peers.sh" = "${file("${path.module}/scripts/deploy-peers.sh")}"
+    "deploy-orders.sh" = "${file("${path.module}/scripts/deploy-orders.sh")}"
+    "deploy-channel.sh" = "${file("${path.module}/scripts/deploy-channel.sh")}"
+    "deploy-main-channel.sh" = "${file("${path.module}/scripts/deploy-main-channel.sh")}"
+    "deploy-chaincode.sh" = "${file("${path.module}/scripts/deploy-chaincode.sh")}"
   }
   depends_on = [ kubernetes_config_map.install_tools ]
 }

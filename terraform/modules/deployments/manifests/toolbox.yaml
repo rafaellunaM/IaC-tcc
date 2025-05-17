@@ -18,6 +18,9 @@ spec:
       - name: ubuntu
         image: ubuntu
         command: ["sh", "-c", "echo 'Container started'; sleep infinity"]
+        envFrom:
+        - secretRef:
+              name: config-hlf-env
         volumeMounts:
           - name: script-volume
             mountPath: /install-tools
