@@ -15,6 +15,7 @@ spec:
         app: ubuntu
     spec:
       containers:
+        # Set a tag and use ubuntu minimal to toolbox
       - name: ubuntu
         image: ubuntu
         command: ["sh", "-c", "echo 'Container started'; sleep infinity"]
@@ -24,13 +25,10 @@ spec:
         volumeMounts:
           - name: script-volume
             mountPath: /install-tools
-            readOnly: true
           - name: aws-env-volume
             mountPath: /aws-vars
-            readOnly: true
           - name: hlf-volume
             mountPath: /install-hlf
-            readOnly: true
       volumes:
         - name: script-volume
           configMap:

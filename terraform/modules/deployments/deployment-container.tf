@@ -60,22 +60,51 @@ resource "kubernetes_config_map" "install_tools" {
   depends_on = [ kubernetes_secret.aws_credentials ]
 }
 
+# resource "kubernetes_config_map" "install_HLF" {
+#   metadata {
+#     name = "install-hlf"
+#   }
+#   data = {
+#     "hlf-operator.sh" = "${file("${path.module}/scripts/hlf-operator.sh")}"
+#     "install-istio.sh" = "${file("${path.module}/scripts/install-istio.sh")}"
+#     "config-coreDns.sh" = "${file("${path.module}/scripts/config-coreDns.sh")}"
+#     "create-CAs.sh" = "${file("${path.module}/scripts/create-CAs.sh")}"
+#     "deploy-peers.sh" = "${file("${path.module}/scripts/deploy-peers.sh")}"
+#     "deploy-orders.sh" = "${file("${path.module}/scripts/deploy-orders.sh")}"
+#     "deploy-channel.sh" = "${file("${path.module}/scripts/deploy-channel.sh")}"
+#     "deploy-main-channel.sh" = "${file("${path.module}/scripts/deploy-main-channel.sh")}"
+#     "deploy-chaincode.sh" = "${file("${path.module}/scripts/deploy-chaincode.sh")}"
+#   }
+#   depends_on = [ kubernetes_config_map.install_tools ]
+# }
+
 resource "kubernetes_config_map" "install_HLF" {
   metadata {
     name = "install-hlf"
   }
   data = {
     "hlf-operator.sh" = "${file("${path.module}/scripts/hlf-operator.sh")}"
+    "install-istio.sh" = "${file("${path.module}/scripts/install-istio.sh")}"
     "config-coreDns.sh" = "${file("${path.module}/scripts/config-coreDns.sh")}"
-    "create-CAs.sh" = "${file("${path.module}/scripts/create-CAs.sh")}"
-    "deploy-peers.sh" = "${file("${path.module}/scripts/deploy-peers.sh")}"
-    "deploy-orders.sh" = "${file("${path.module}/scripts/deploy-orders.sh")}"
-    "deploy-channel.sh" = "${file("${path.module}/scripts/deploy-channel.sh")}"
-    "deploy-main-channel.sh" = "${file("${path.module}/scripts/deploy-main-channel.sh")}"
-    "deploy-chaincode.sh" = "${file("${path.module}/scripts/deploy-chaincode.sh")}"
+
+    "create-CAs.go" = "${file("${path.module}/poc/create-CAs.go")}"
+    "register-user-ca.go" = "${file("${path.module}/poc/register-user-ca.go")}"
+    "deploy-peer.go" = "${file("${path.module}/poc/deploy-peer.go")}"
+
+    "create-order-cas.go" = "${file("${path.module}/poc/create-order-cas.go")}"
+    "register-order-users.go" = "${file("${path.module}/poc/register-order-users.go")}"
+    "deploy-orderer.go" = "${file("${path.module}/poc/deploy-orderer.go")}"
+
+    "OrdererMSP_identity.go" = "${file("${path.module}/poc/OrdererMSP_identity.go")}"
+    "Org1MSP_identity.go" = "${file("${path.module}/poc/Org1MSP_identity.go")}"
+    "create-generic-wallet.go" = "${file("${path.module}/poc/create-generic-wallet.go")}"
+    
+    "create-main-channel.go" = "${file("${path.module}/poc/create-main-channel.go")}"
+    "join-channel.go" = "${file("${path.module}/poc/join-channel.go")}"    
   }
   depends_on = [ kubernetes_config_map.install_tools ]
 }
+
 
 resource "kubectl_manifest" "toolbox_container" {
   yaml_body =  "${file("${path.module}/manifests/toolbox.yaml")}"
