@@ -1,0 +1,81 @@
+amends "./hlf.pkl"
+
+Orgs = new {"ca-org1" "ca-ord"}
+
+CAs {
+  // change values ./hlf.pkl
+  // [0] = new {
+  //   ["capacity"] = "1Gi"
+  //   ["name"] = "org1-ca"
+  //   ["enrollId"] = "enroll"
+  //   ["enrollPw"] = "enrollpw"
+  //   ["hosts"] = "org1-ca.localho.st"
+  //   ["istioPort"] = "443"
+  // }
+
+  // add new peer
+  //  new {
+  //   ["capacity"] = ""
+  //   ["name"] = ""
+  //   ["enrollId"] = ""
+  //   ["enrollPw"] = ""
+  //   ["hosts"] = ""
+  //   ["istioPort"] = ""
+  // }
+}
+
+Peers {
+  // change values ./hlf.pkl
+  // [0] = new{
+  // ["enrollId"] = "peer"
+  // ["mspid"] = "Org1MSP"
+  // ["enrollPw"] = "peerpw"
+  // ["capacity"] = "5Gi"
+  // ["name"] = "org1-peer0"
+  // ["ca-name"] = "org1-ca.default"
+  // ["hosts"] = "peer0-org1.localho.st"
+  // ["istioPort"] = "443"
+  // } 
+
+  // add new peer
+  //new{
+  // ["enrollId"] = ""
+  // ["mspid"] = ""
+  // ["enrollPw"] = ""
+  // ["capacity"] = ""
+  // ["name"] = ""
+  // ["ca-name"] = ""
+  // ["hosts"] = ""
+  // ["istioPort"] = ""
+  // } 
+}
+
+Orderes {
+  //change values ./hlf.pkl
+  //[0] =  new {
+  //   ["enrollId"] = "orderer"
+  //   ["mspid"] = "OrdererMSP"
+  //   ["enrollPw"] = "ordererpw"
+  //   ["capacity"] = "2Gi"
+  //   ["name"] = "ord-node-1"
+  //   ["ca-name"] = "ord-ca.default"
+  //   ["hosts"] = "orderer1-ord.localho.st"
+  //   ["admin-hosts"] = "admin-orderer1-ord.localho.st"
+  //   ["istioPort"] = "443"
+  // }
+  
+  // add new orderer
+  // new {
+  //   ["enrollId"] = ""
+  //   ["mspid"] = ""
+  //   ["enrollPw"] = ""
+  //   ["capacity"] = ""
+  //   ["name"] = ""
+  //   ["ca-name"] = ""
+  //   ["hosts"] = ""
+  //   ["admin-hosts"] = ""
+  //   ["istioPort"] = ""
+  // }
+}
+
+Channels{}

@@ -1,0 +1,76 @@
+module hfl_resources
+
+Orgs: Listing<String> = new  {}
+
+typealias CaConfig =
+  "capacity"
+  | "name"
+  | "enrollId"
+  | "enrollPw"
+  | "hosts"
+  | "istioPort"
+
+typealias PeerConfig = 
+  "name"
+  | "enrollId"
+  | "enrollPw"
+  | "hosts"
+  | "istioPort"
+  | "mspid"
+  | "capacity"
+  | "ca-name"
+
+typealias OrderConfig = 
+  "name"
+  | "enrollId"
+  | "enrollPw"
+  | "hosts"
+  | "admin-hosts"
+  | "istioPort"
+  | "mspid"
+  | "capacity"
+  | "ca-name"
+
+CAs: Listing<Mapping<String, String>> = new {
+  new {
+    ["capacity"] = "1Gi"
+    ["name"] = "org1-ca"
+    ["enrollId"] = "enroll"
+    ["enrollPw"] = "enrollpw"
+    ["hosts"] = "org1-ca.localho.st"
+    ["istioPort"] = "443"
+  }
+}
+
+Peers: Listing<Mapping<PeerConfig, String>> = new  {
+  new {
+    ["enrollId"] = "peer"
+    ["mspid"] = "Org1MSP"
+    ["enrollPw"] = "peerpw"
+    ["capacity"] = "5Gi"
+    ["name"] = "org1-peer0"
+    ["ca-name"] = "org1-ca.default"
+    ["hosts"] = "peer0-org1.localho.st"
+    ["istioPort"] = "443"
+  }
+}
+
+Orderes: Listing<Mapping<OrderConfig, String>> = new  {
+  new {
+    ["enrollId"] = "orderer"
+    ["mspid"] = "OrdererMSP"
+    ["enrollPw"] = "ordererpw"
+    ["capacity"] = "2Gi"
+    ["name"] = "ord-node-1"
+    ["ca-name"] = "ord-ca.default"
+    ["hosts"] = "orderer1-ord.localho.st"
+    ["admin-hosts"] = "admin-orderer1-ord.localho.st"
+    ["istioPort"] = "443"
+  }
+}
+
+Channels: Listing<Mapping<String, Listing<String>>> = new {
+  new {
+    ["mainChannel"] = new {"ca-org-1" "test"}
+  }
+}

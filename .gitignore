@@ -2,6 +2,7 @@ aws.env
 .terraform*
 terraform.*
 istio-1.23.3
+terraform/modules/deployments/code/
 
 # Exception
 !terraform.tfvars.json

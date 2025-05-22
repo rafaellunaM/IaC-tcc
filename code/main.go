@@ -56,7 +56,7 @@ type OrdConfig struct {
 func main() {
 
 
-	file, err := os.ReadFile("test-b.json")
+	file, err := os.ReadFile("output.json")
 	if err != nil {
 		log.Fatalf("Erro ao ler arquivo: %s", err)
 	}
