@@ -2,7 +2,8 @@ aws.env
 .terraform*
 terraform.*
 istio-1.23.3
-terraform/modules/deployments/code/
+terraform/modules/deployments/bkp/
+terraform/modules/deployments/code-adjust/
 
 # Exception
 !terraform.tfvars.json

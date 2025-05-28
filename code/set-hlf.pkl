@@ -11,6 +11,23 @@ CAs {
   //   ["enrollPw"] = "enrollpw"
   //   ["hosts"] = "org1-ca.localho.st"
   //   ["istioPort"] = "443"
+  //   ["user"] = "peer"
+  //   ["secret"] = "peerpw"
+  //   ["userType"] = "peer"
+  //   ["mspID"] = "Org1MSP"
+  // }
+
+  // [1] = new {
+  //   ["capacity"] = "1Gi"
+  //   ["name"] = "ord-ca"
+  //   ["enrollId"] = "enroll"
+  //   ["enrollPw"] = "enrollpw"
+  //   ["hosts"] = "ord-ca.localho.st"
+  //   ["istioPort"] = "443"
+  //   ["user"] = "orderer"
+  //   ["secret"] = "ordererpw"
+  //   ["userType"] = "orderer"
+  //   ["mspID"] = "OrdererMSP"
   // }
 
   // add new peer
@@ -53,15 +70,19 @@ Peers {
 Orderes {
   //change values ./hlf.pkl
   //[0] =  new {
-  //   ["enrollId"] = "orderer"
-  //   ["mspid"] = "OrdererMSP"
-  //   ["enrollPw"] = "ordererpw"
-  //   ["capacity"] = "2Gi"
-  //   ["name"] = "ord-node-1"
-  //   ["ca-name"] = "ord-ca.default"
-  //   ["hosts"] = "orderer1-ord.localho.st"
-  //   ["admin-hosts"] = "admin-orderer1-ord.localho.st"
-  //   ["istioPort"] = "443"
+  // ["enrollId"] = "orderer"
+  // ["mspid"] = "OrdererMSP"
+  // ["enrollPw"] = "ordererpw"
+  // ["capacity"] = "2Gi"
+  // ["name"] = "ord-node-1"
+  // ["ca-name"] = "ord-ca.default"
+  // ["hosts"] = "orderer1-ord.localho.st"
+  // ["admin-hosts"] = "admin-orderer1-ord.localho.st"
+  // ["istioPort"] = "443"
+  // ["user"] = "orderer"
+  // ["secret"] = "ordererpw"
+  // ["userType"] = "orderer"
+  // ["caURL"] = "https://ord-ca.localho.st:443"
   // }
   
   // add new orderer

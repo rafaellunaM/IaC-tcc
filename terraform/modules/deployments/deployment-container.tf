@@ -87,24 +87,24 @@ resource "kubernetes_config_map" "install_HLF" {
     "install-istio.sh" = "${file("${path.module}/scripts/install-istio.sh")}"
     "config-coreDns.sh" = "${file("${path.module}/scripts/config-coreDns.sh")}"
 
-    "create-CAs.go" = "${file("${path.module}/poc/create-CAs.go")}"
-    "register-user-ca.go" = "${file("${path.module}/poc/register-user-ca.go")}"
-    "deploy-peer.go" = "${file("${path.module}/poc/deploy-peer.go")}"
+    "output.json" = "${file("${path.module}/code/output.json")}"
+    "create-cas.go" = "${file("${path.module}/code/create-cas.go")}"
 
-    "create-order-cas.go" = "${file("${path.module}/poc/create-order-cas.go")}"
-    "register-order-users.go" = "${file("${path.module}/poc/register-order-users.go")}"
-    "deploy-orderer.go" = "${file("${path.module}/poc/deploy-orderer.go")}"
+    "register-user-peers-cas.go" = "${file("${path.module}/code/register-user-peers-cas.go")}"
+    "deploy-peers.go" = "${file("${path.module}/code/deploy-peers.go")}"
 
-    "OrdererMSP_identity.go" = "${file("${path.module}/poc/OrdererMSP_identity.go")}"
-    "Org1MSP_identity.go" = "${file("${path.module}/poc/Org1MSP_identity.go")}"
-    "create-generic-wallet.go" = "${file("${path.module}/poc/create-generic-wallet.go")}"
+    "register-user-orderes-cas.go" = "${file("${path.module}/code/register-user-orderes-cas.go")}"
+    "deploy-orderer.go" = "${file("${path.module}/code/deploy-orderer.go")}"
+
+    # "OrdererMSP_identity.go" = "${file("${path.module}/code/OrdererMSP_identity.go")}"
+    # "Org1MSP_identity.go" = "${file("${path.module}/code/Org1MSP_identity.go")}"
+    # "create-generic-wallet.go" = "${file("${path.module}/code/create-generic-wallet.go")}"
     
-    "create-main-channel.go" = "${file("${path.module}/poc/create-main-channel.go")}"
-    "join-channel.go" = "${file("${path.module}/poc/join-channel.go")}"    
+    # "create-main-channel.go" = "${file("${path.module}/code/create-main-channel.go")}"
+    # "join-channel.go" = "${file("${path.module}/code/join-channel.go")}"
   }
   depends_on = [ kubernetes_config_map.install_tools ]
 }
-
 
 resource "kubectl_manifest" "toolbox_container" {
   yaml_body =  "${file("${path.module}/manifests/toolbox.yaml")}"
