@@ -48,7 +48,21 @@ typealias OrderConfig =
   | "userType"
   | "caURL"
 
-CAs: Listing<Mapping<CaConfig, String>> = new {
+typealias ChannelsConfig = 
+  "name"
+  | "userAdmin"
+  | "secretadmin"
+  | "userType"
+  | "enrollID"
+  | "enrollPW"
+  | "mspID"
+  | "namespace"
+  | "caNameTls"
+  | "caName"
+  | "fileOutput"
+  | "fileOutputTls"
+
+CA: Listing<Mapping<CaConfig, String>> = new {
   new {
     ["capacity"] = "1Gi"
     ["name"] = "org1-ca"
@@ -94,7 +108,7 @@ Peers: Listing<Mapping<PeerConfig, String>> = new  {
   }
 }
 
-Orderes: Listing<Mapping<OrderConfig, String>> = new {
+Orderer: Listing<Mapping<OrderConfig, String>> = new {
   new {
     ["CAName"] = "ord-ca"
     ["user"] = "orderer"
@@ -115,8 +129,35 @@ Orderes: Listing<Mapping<OrderConfig, String>> = new {
   }
 }
 
-Channels: Listing<Mapping<String, Listing<String>>> = new {
+Channel: Listing<Mapping<ChannelsConfig, String>> = new {
+  //OrdererMSP 
   new {
-    ["mainChannel"] = new {"ca-org-1" "test"}
+    ["name"]        = "ord-ca"
+    ["userAdmin"]   = "admin"
+    ["secretadmin"] = "adminpw"
+    ["userType"]    = "admin"
+    ["enrollID"]    = "enroll"
+    ["enrollPW"]    = "enrollpw"
+    ["mspID"]       = "OrdererMSP"
+    ["namespace"]   = "default"
+    ["caNameTls"]   = "tlsca"
+    ["caName"]      = "ca"
+    ["fileOutput"]    = "orderermsp.yaml"
+    ["fileOutputTls"] = "orderermspsign.yaml"
+  }
+  //Org1MSP 
+  new {
+    ["name"]          = "org1-ca"
+    ["userAdmin"]     = "admin"
+    ["secretadmin"]   = "adminpw"
+    ["userType"]      = "admin"
+    ["enrollID"]      = "enroll"
+    ["enrollPW"]      = "enrollpw"
+    ["mspID"]         = "Org1MSP"
+    ["namespace"]     = "default"
+    ["caNameTls"]     = "tlsca"
+    ["caName"]        = "ca"
+    ["fileOutput"]    = "org1msp.yaml"
+    ["fileOutputTls"] = "org1msp-tlsca.yaml"
   }
 }

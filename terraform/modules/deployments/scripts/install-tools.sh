@@ -7,6 +7,7 @@ apt-get update && apt-get install -y bash-completion
 apt install curl -y
 apt install wget -y
 apt install git -y
+git clone https://github.com/rafaellunaM/hlf-module-tcc.git /home/hlf-module-tcc
 wget https://go.dev/dl/go1.24.3.linux-amd64.tar.gz
 rm -rf /usr/local/go && tar -C /usr/local -xzf go1.24.3.linux-amd64.tar.gz
 # adjust to export to another terminal
@@ -23,7 +24,6 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
 install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 rm kubectl
-mkdir -p ~/.aws
 
 cat > ~/.aws/credentials <<EOF
 [default]

@@ -1,7 +1,4 @@
 ## To Do
-* modulirize terraform
-* create a way to edit paramaters of config on the terraform 
-* deploy HLF
 * paramateizer HLF
 * configure HLF options from pkl file
 * test installation

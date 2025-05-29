@@ -3,7 +3,7 @@
     "ca-org1",
     "ca-ord"
   ],
-  "CAs": [
+  "CA": [
     {
       "capacity": "1Gi",
       "name": "org1-ca",
@@ -47,7 +47,7 @@
       "userType": "peer"
     }
   ],
-  "Orderes": [
+  "Orderer": [
     {
       "CAName": "ord-ca",
       "user": "orderer",
@@ -67,12 +67,34 @@
       "admin-hosts": "admin-orderer0-ord.localho.st"
     }
   ],
-  "Channels": [
+  "Channel": [
     {
-      "mainChannel": [
-        "ca-org-1",
-        "test"
-      ]
+      "name": "ord-ca",
+      "userAdmin": "admin",
+      "secretadmin": "adminpw",
+      "userType": "admin",
+      "enrollID": "enroll",
+      "enrollPW": "enrollpw",
+      "mspID": "OrdererMSP",
+      "namespace": "default",
+      "caNameTls": "tlsca",
+      "caName": "ca",
+      "fileOutput": "orderermsp.yaml",
+      "fileOutputTls": "orderermspsign.yaml"
+    },
+    {
+      "name": "org1-ca",
+      "userAdmin": "admin",
+      "secretadmin": "adminpw",
+      "userType": "admin",
+      "enrollID": "enroll",
+      "enrollPW": "enrollpw",
+      "mspID": "Org1MSP",
+      "namespace": "default",
+      "caNameTls": "tlsca",
+      "caName": "ca",
+      "fileOutput": "org1msp.yaml",
+      "fileOutputTls": "org1msp-tlsca.yaml"
     }
   ]
 }

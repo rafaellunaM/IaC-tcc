@@ -2,7 +2,7 @@ amends "./hlf.pkl"
 
 Orgs = new {"ca-org1" "ca-ord"}
 
-CAs {
+CA {
   // change values ./hlf.pkl
   // [0] = new {
   //   ["capacity"] = "1Gi"
@@ -67,7 +67,7 @@ Peers {
   // } 
 }
 
-Orderes {
+Orderer {
   //change values ./hlf.pkl
   //[0] =  new {
   // ["enrollId"] = "orderer"
@@ -99,4 +99,4 @@ Orderes {
   // }
 }
 
-Channels{}
+Channel{}
