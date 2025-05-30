@@ -68,24 +68,7 @@ resource "kubernetes_config_map" "install_HLF" {
     "hlf-operator.sh" = "${file("${path.module}/scripts/hlf-operator.sh")}"
     "install-istio.sh" = "${file("${path.module}/scripts/install-istio.sh")}"
     "config-coreDns.sh" = "${file("${path.module}/scripts/config-coreDns.sh")}"
-    "output.json" = "${file("${path.module}/code/output.json")}"
-
-    # "create-cas.go" = "${file("${path.module}/code/create-cas.go")}"
-
-    # "register-user-peers-cas.go" = "${file("${path.module}/code/register-user-peers-cas.go")}"
-    # "deploy-peers.go" = "${file("${path.module}/code/deploy-peers.go")}"
-
-    # "register-user-orderes-cas.go" = "${file("${path.module}/code/register-user-orderes-cas.go")}"
-    # "deploy-orderer.go" = "${file("${path.module}/code/deploy-orderer.go")}"
-
-    # # Register and enrolling OrdererMSP identity
-    # "channel-ca-register.go" = "${file("${path.module}/code/channel-ca-register.go")}"
-    # "channel-ca-enroll.go" = "${file("${path.module}/code/channel-ca-enroll.go")}"
-
-    # "create-generic-wallet.go" = "${file("${path.module}/code/create-generic-wallet.go")}"
-    
-    # "create-main-channel.go" = "${file("${path.module}/code/create-main-channel.go")}"
-    # "join-channel.go" = "${file("${path.module}/code/join-channel.go")}"
+    "output.json" = "${file("${path.module}/files/output.json")}"
   }
   depends_on = [ kubernetes_config_map.install_tools ]
 }
