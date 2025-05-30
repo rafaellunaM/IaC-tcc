@@ -1,262 +1,202 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
+	"hlf/internal/fabric"
+	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
-	"hlf"
 )
 
-func getIndentedCert(resourceType, resourceName, jsonPath string) (string, error) {
-	cmd := exec.Command("kubectl", "get", resourceType, resourceName, "-o", "jsonpath="+jsonPath)
-	output, err := cmd.Output()
+func extractCertFromFile(filename string) (string, error) {
+	// Lê o arquivo
+	content, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("erro ao ler arquivo %s: %v", filename, err)
 	}
-	lines := strings.Split(string(output), "\n")
-	for i := range lines {
-		lines[i] = "        " + lines[i]
-	}
-	return strings.Join(lines, "\n"), nil
-}
 
-func buildPeerOrganizationsYAML(peers []Peer, cas []CA) string {
-	var result strings.Builder
+	// Converte para string
+	contentStr := string(content)
 
-	mspToPeer := make(map[string]Peer)
-	for _, peer := range peers {
-		mspToPeer[peer.Mspid] = peer
+	// Encontra o início do certificado
+	certStart := strings.Index(contentStr, "-----BEGIN CERTIFICATE-----")
+	if certStart == -1 {
+		return "", fmt.Errorf("certificado não encontrado no arquivo %s", filename)
 	}
-	
-	for _, peer := range mspToPeer {
-		var caName string
-		for _, ca := range cas {
-			if ca.Name == peer.CAName {
-				caName = ca.Name
-				break
-			}
-		}
-		
-		result.WriteString(fmt.Sprintf(`    - mspID: %s
-      caName: "%s"
-      caNamespace: "default"
-`, peer.Mspid, caName))
-	}
-	
-	return result.String()
-}
 
-func buildIdentitiesYAML(channels []Channel) string {
-	var result strings.Builder
-	
-	for _, ch := range channels {
-		result.WriteString(fmt.Sprintf(`    %s:
-      secretKey: %s
-      secretName: wallet
-      secretNamespace: default
-`, ch.MspID, ch.FileOutput))
-
-		if ch.MspID == "OrdererMSP" {
-			result.WriteString(fmt.Sprintf(`    %s-tls:
-      secretKey: %s
-      secretName: wallet
-      secretNamespace: default
-    %s-sign:
-      secretKey: %s
-      secretName: wallet
-      secretNamespace: default
-`, ch.MspID, ch.FileOutput, ch.MspID, ch.FileOutputTls))
-		}
+	// Encontra o fim do certificado
+	certEnd := strings.Index(contentStr[certStart:], "-----END CERTIFICATE-----")
+	if certEnd == -1 {
+		return "", fmt.Errorf("fim do certificado não encontrado no arquivo %s", filename)
 	}
-	
-	return result.String()
-}
 
-func buildOrdererOrganizationsYAML(orderers []Orderer, cas []CA) string {
-	var result strings.Builder
-
-	mspToOrderer := make(map[string][]Orderer)
-	for _, orderer := range orderers {
-		mspToOrderer[orderer.Mspid] = append(mspToOrderer[orderer.Mspid], orderer)
-	}
+	// Extrai o certificado completo
+	cert := contentStr[certStart : certStart+certEnd+len("-----END CERTIFICATE-----")]
 	
-	for mspID, ordererList := range mspToOrderer {
-		var caName string
-		for _, ca := range cas {
-			if ca.MspID == mspID {
-				caName = ca.Name
-				break
-			}
-		}
-		
-		result.WriteString(fmt.Sprintf(`    - caName: "%s"
-      caNamespace: "default"
-      externalOrderersToJoin:
-`, caName))
-		for _, orderer := range ordererList {
-			result.WriteString(fmt.Sprintf(`        - host: %s.default
-          port: 7053
-`, orderer.Name))
-		}
-		
-		result.WriteString(fmt.Sprintf(`      mspID: %s
-      ordererEndpoints:
-`, mspID))
-		for _, orderer := range ordererList {
-			result.WriteString(fmt.Sprintf(`        - %s:443
-`, orderer.Hosts))
-		}
-		
-		result.WriteString(`      orderersToJoin: []
-`)
-	}
-	
-	return result.String()
-}
-
-func buildOrderersYAML(orderers []Orderer, tlsCerts []string) string {
-	var result strings.Builder
-	
-	for i, orderer := range orderers {
-		result.WriteString(fmt.Sprintf(`    - host: %s
-      port: 443
-      tlsCert: |-
-%s
-`, orderer.Hosts, tlsCerts[i]))
-	}
-	
-	return result.String()
-}
-
-func buildAdminOrgsYAML(channels []Channel, orgType string) string {
-	var result strings.Builder
-	seenMSPs := make(map[string]bool)
-	
-	for _, ch := range channels {
-		if !seenMSPs[ch.MspID] {
-			if (orgType == "orderer" && ch.MspID == "OrdererMSP") ||
-			   (orgType == "peer" && ch.MspID != "OrdererMSP") {
-				result.WriteString(fmt.Sprintf(`    - mspID: %s
-`, ch.MspID))
-				seenMSPs[ch.MspID] = true
-			}
-		}
-	}
-	
-	return result.String()
+	return cert, nil
 }
 
 func main() {
-	configFile := "output.json"
-	if len(os.Args) > 1 {
-		configFile = os.Args[1]
+	// Variáveis de ambiente opcionais
+	channelName := os.Getenv("CHANNEL_NAME")
+	if channelName == "" {
+		channelName = "demo"
 	}
-	
-	raw, err := os.ReadFile(configFile)
+
+	secretName := os.Getenv("SECRET_NAME")
+	if secretName == "" {
+		secretName = "wallet"
+	}
+
+	secretNamespace := os.Getenv("SECRET_NAMESPACE")
+	if secretNamespace == "" {
+		secretNamespace = "default"
+	}
+
+	// Lê o arquivo de configuração
+	file, err := os.ReadFile("output.json")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "❌ Erro lendo %s: %v\n", configFile, err)
-		os.Exit(1)
+		log.Fatalf("❌ Erro ao ler o JSON: %v", err)
 	}
 
 	var config fabric.Config
-	if err := json.Unmarshal(raw, &config); err != nil {
-		fmt.Fprintf(os.Stderr, "❌ Erro no unmarshal: %v\n", err)
-		os.Exit(1)
+	if err := json.Unmarshal(file, &config); err != nil {
+		log.Fatalf("❌ Erro ao fazer unmarshal do JSON: %v", err)
 	}
 
-	channelName := "demo"
-
-	fmt.Println("📄 Coletando certificados TLS dos orderers...")
-
-	var tlsCerts []string
-	var errors []error
+	// Constrói as listas de MSP IDs
+	var ordererMSPs []string
+	var peerMSPs []string
 	
-	for _, orderer := range config.Orderers {
-		cert, err := getIndentedCert("fabricorderernodes", orderer.Name, "{.status.tlsCert}")
-		tlsCerts = append(tlsCerts, cert)
-		errors = append(errors, err)
-	}
-
-	hasErrors := false
-	for i, err := range errors {
-		if err != nil {
-			if !hasErrors {
-				fmt.Printf("❌ Erros ao pegar TLS certs dos orderers:\n")
-				hasErrors = true
-			}
-			fmt.Printf("  %s: %v\n", config.Orderers[i].Name, err)
+	for _, ca := range config.CAs {
+		if ca.UserType == "orderer" {
+			ordererMSPs = append(ordererMSPs, ca.MspID)
+		} else if ca.UserType == "peer" {
+			peerMSPs = append(peerMSPs, ca.MspID)
 		}
 	}
+
+	// Constrói a lista de identidades
+	var identities []string
+	for _, channel := range config.Channels {
+		// Identidade principal
+		identity := fmt.Sprintf("%s;%s", channel.MspID, channel.FileOutput)
+		identities = append(identities, identity)
+		
+		// Identidade de assinatura/TLS
+		if channel.FileOutputTls != "" {
+			identityTls := fmt.Sprintf("%s-tls;%s", channel.MspID, channel.FileOutputTls)
+			identities = append(identities, identityTls)
+		}
+		
+		// Adiciona identidade de assinatura para orderer
+		if strings.Contains(channel.MspID, "Orderer") {
+			identitySign := fmt.Sprintf("%s-sign;%s", channel.MspID, strings.Replace(channel.FileOutput, ".yaml", "sign.yaml", 1))
+			identities = append(identities, identitySign)
+		}
+	}
+
+	// Constrói a lista de consenters
+	var consenters []string
+	for _, orderer := range config.Orderers {
+		consenter := fmt.Sprintf("%s:%s", orderer.Hosts, orderer.IstioPort)
+		consenters = append(consenters, consenter)
+	}
+
+	// Extrai o certificado TLS do orderer
+	fmt.Println("🔍 Extraindo certificado TLS do orderer...")
+	ordererCertFile := "orderermsp.yaml"
+	for _, channel := range config.Channels {
+		if strings.Contains(channel.MspID, "Orderer") && channel.FileOutput != "" {
+			ordererCertFile = channel.FileOutput
+			break
+		}
+	}
+
+	cert, err := extractCertFromFile(ordererCertFile)
+	if err != nil {
+		log.Printf("⚠️  Aviso: não foi possível extrair o certificado: %v", err)
+		// Continua sem o certificado, pode ser adicionado manualmente depois
+	}
+
+	// Salva o certificado em um arquivo temporário se foi extraído
+	certFile := "/tmp/orderer-cert.pem"
+	if cert != "" {
+		err = ioutil.WriteFile(certFile, []byte(cert), 0644)
+		if err != nil {
+			log.Fatalf("❌ Erro ao salvar certificado: %v", err)
+		}
+		defer os.Remove(certFile) // Remove o arquivo temporário ao final
+	}
+
+	// Constrói o comando
+	fmt.Printf("🔧 Criando o canal principal %s...\n", channelName)
 	
-	if hasErrors {
-		os.Exit(1)
+	args := []string{
+		"hlf", "channelcrd", "main", "create",
+		"--name", channelName,
+		"--channel-name", channelName,
+		"--absolute-max-bytes", "1048576",
+		"--max-message-count", "10",
+		"--preferred-max-bytes", "524288",
+		"--batch-timeout", "2s",
+		"--etcd-raft-election-tick", "10",
+		"--etcd-raft-heartbeat-tick", "1",
+		"--etcd-raft-max-inflight-blocks", "5",
+		"--etcd-raft-snapshot-interval-size", "16777216",
+		"--etcd-raft-tick-interval", "500ms",
+		"--secret-name", secretName,
+		"--secret-ns", secretNamespace,
 	}
-	yaml := fmt.Sprintf(`apiVersion: hlf.kungfusoftware.es/v1alpha1
-kind: FabricMainChannel
-metadata:
-  name: %s
-spec:
-  name: %s
-  adminOrdererOrganizations:
-%s  adminPeerOrganizations:
-%s  channelConfig:
-    application:
-      acls: null
-      capabilities:
-        - V2_0
-        - V2_5
-      policies: null
-    capabilities:
-      - V2_0
-    orderer:
-      batchSize:
-        absoluteMaxBytes: 1048576
-        maxMessageCount: 10
-        preferredMaxBytes: 524288
-      batchTimeout: 2s
-      capabilities:
-        - V2_0
-      etcdRaft:
-        options:
-          electionTick: 10
-          heartbeatTick: 1
-          maxInflightBlocks: 5
-          snapshotIntervalSize: 16777216
-          tickInterval: 500ms
-      ordererType: etcdraft
-      policies: null
-      state: STATE_NORMAL
-    policies: null
-  externalOrdererOrganizations: []
-  externalPeerOrganizations: []
-  peerOrganizations:
-%s  identities:
-%s  ordererOrganizations:
-%s  orderers:
-%s`,
-		channelName,
-		channelName,
-		buildAdminOrgsYAML(config.Channels, "orderer"),
-		buildAdminOrgsYAML(config.Channels, "peer"),
-		buildPeerOrganizationsYAML(config.Peers, config.CAs),
-		buildIdentitiesYAML(config.Channels),
-		buildOrdererOrganizationsYAML(config.Orderers, config.CAs),
-		buildOrderersYAML(config.Orderers, tlsCerts))
 
-	fmt.Printf("📤 Aplicando recurso FabricMainChannel '%s'...\n", channelName)
+	// Adiciona MSP IDs de admin
+	for _, msp := range ordererMSPs {
+		args = append(args, "--admin-orderer-orgs", msp)
+		args = append(args, "--orderer-orgs", msp)
+	}
+	
+	for _, msp := range peerMSPs {
+		args = append(args, "--admin-peer-orgs", msp)
+		args = append(args, "--peer-orgs", msp)
+	}
 
-	applyCmd := exec.Command("kubectl", "apply", "-f", "-")
-	applyCmd.Stdin = bytes.NewBufferString(yaml)
-	applyCmd.Stdout = os.Stdout
-	applyCmd.Stderr = os.Stderr
+	// Adiciona identidades
+	for _, identity := range identities {
+		args = append(args, "--identities", identity)
+	}
 
-	if err := applyCmd.Run(); err != nil {
-		fmt.Printf("❌ Erro ao aplicar canal: %v\n", err)
+	// Adiciona consenters
+	for _, consenter := range consenters {
+		args = append(args, "--consenters", consenter)
+	}
+
+	// Adiciona certificado se foi extraído
+	if cert != "" {
+		args = append(args, "--consenter-certificates", certFile)
+	}
+
+	// Adiciona flag de output para visualizar antes de aplicar
+	// args = append(args, "--output")
+
+	// Executa o comando
+	cmd := exec.Command("kubectl", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	// Debug: imprime o comando completo
+	fmt.Println("📋 Comando a ser executado:")
+	fmt.Println("kubectl", strings.Join(args, " "))
+	fmt.Println()
+
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("❌ Erro ao criar o canal principal: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("✅ Canal '%s' criado com sucesso.\n", channelName)
+	fmt.Printf("✅ Canal principal %s criado com sucesso.\n", channelName)
+	fmt.Println()
+	fmt.Println("💡 Para aplicar o canal, remova a flag --output e execute novamente.")
 }

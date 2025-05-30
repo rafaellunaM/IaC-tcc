@@ -12,14 +12,14 @@ type Channels struct {
 	Name       		string `json:"name"`
 	UserAdmin 		string `json:"userAdmin"`
 	Secretadmin 	string `json:"secretadmin"`
-	Type 			 		string `json:"userType"`
+	UserType 			string `json:"userType"`
 	EnrollID   		string `json:"enrollId"`
 	EnrollPW   		string `json:"enrollPw"`
-	MPSID      		string `json:"hosts"`
+	MPSID      		string `json:"mspID"`
 }
 
 type FullResources struct {
-	Channels []Channels `json:"Channels"`
+	Channels []Channels `json:"Channel"`
 }
 
 func main() {
@@ -40,7 +40,7 @@ func main() {
 				"--name="+channels.Name,
 				"--user="+ channels.UserAdmin,
 				"--secret="+channels.Secretadmin,
-				"--type="+channels.Type,
+				"--type="+channels.UserType,
 				"--enroll-id="+channels.EnrollID,
 				"--enroll-secret="+channels.EnrollPW,
 				"--mspid="+channels.MPSID,

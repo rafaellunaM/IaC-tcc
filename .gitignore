@@ -4,6 +4,7 @@ terraform.*
 istio-1.23.3
 terraform/modules/deployments/bkp/
 terraform/modules/deployments/code-adjust/
+debug
 
 # Exception
 !terraform.tfvars.json

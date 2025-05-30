@@ -16,7 +16,7 @@ type SecretChannel struct {
 }
 
 type FullResources struct {
-	Channels []SecretChannel `json:"Channels"`
+	Channels []SecretChannel `json:"Channel"`
 }
 
 func main() {

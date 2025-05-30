@@ -18,7 +18,7 @@ type CAConfig struct {
 }
 
 type FullResources struct {
-	CAs []CAConfig `json:"CAs"`
+	CAs []CAConfig `json:"CA"`
 }
 
 func main() {

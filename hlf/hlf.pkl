@@ -142,8 +142,8 @@ Channel: Listing<Mapping<ChannelsConfig, String>> = new {
     ["namespace"]   = "default"
     ["caNameTls"]   = "tlsca"
     ["caName"]      = "ca"
-    ["fileOutput"]    = "orderermsp.yaml"
-    ["fileOutputTls"] = "orderermspsign.yaml"
+    ["fileOutput"]    = "orderermspsign.yaml"
+    ["fileOutputTls"] = "orderermsp.yaml"
   }
   //Org1MSP 
   new {

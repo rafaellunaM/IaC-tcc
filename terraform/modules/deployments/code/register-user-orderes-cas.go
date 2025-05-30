@@ -20,7 +20,7 @@ type OrdererConfig struct {
 }
 
 type FullResources struct {
-	Orderes []OrdererConfig `json:"Orderes"`
+	Orderes []OrdererConfig `json:"Orderer"`
 }
 
 func main() {

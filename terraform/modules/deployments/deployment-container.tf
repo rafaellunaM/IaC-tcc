@@ -68,8 +68,8 @@ resource "kubernetes_config_map" "install_HLF" {
     "hlf-operator.sh" = "${file("${path.module}/scripts/hlf-operator.sh")}"
     "install-istio.sh" = "${file("${path.module}/scripts/install-istio.sh")}"
     "config-coreDns.sh" = "${file("${path.module}/scripts/config-coreDns.sh")}"
-    
     "output.json" = "${file("${path.module}/code/output.json")}"
+
     # "create-cas.go" = "${file("${path.module}/code/create-cas.go")}"
 
     # "register-user-peers-cas.go" = "${file("${path.module}/code/register-user-peers-cas.go")}"
