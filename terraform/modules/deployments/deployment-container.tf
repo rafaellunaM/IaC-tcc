@@ -68,7 +68,7 @@ resource "kubernetes_config_map" "install_HLF" {
     "hlf-operator.sh" = "${file("${path.module}/scripts/hlf-operator.sh")}"
     "install-istio.sh" = "${file("${path.module}/scripts/install-istio.sh")}"
     "config-coreDns.sh" = "${file("${path.module}/scripts/config-coreDns.sh")}"
-    "output.json" = "${file("${path.module}/files/output.json")}"
+    "output.json" = "${file("${path.module}/files/hlf-config.json")}"
   }
   depends_on = [ kubernetes_config_map.install_tools ]
 }
