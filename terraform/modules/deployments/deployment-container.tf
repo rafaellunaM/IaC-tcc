@@ -50,27 +50,17 @@ resource "kubernetes_secret" "config_hlf_env" {
   }
 }
 
-resource "kubernetes_config_map" "install_tools" {
-  metadata {
-    name = "install-tools"
-  }
-  data = {
-    "install-tools.sh" = "${file("${path.module}/scripts/install-tools.sh")}"
-  }
-  depends_on = [ kubernetes_secret.aws_credentials ]
-}
-
 resource "kubernetes_config_map" "install_HLF" {
   metadata {
     name = "install-hlf"
   }
   data = {
-    "hlf-operator.sh" = "${file("${path.module}/scripts/hlf-operator.sh")}"
+    "aws-config.sh" = "${file("${path.module}/scripts/aws-config.sh")}"
     "install-istio.sh" = "${file("${path.module}/scripts/install-istio.sh")}"
     "config-coreDns.sh" = "${file("${path.module}/scripts/config-coreDns.sh")}"
     "output.json" = "${file("${path.module}/files/hlf-config.json")}"
   }
-  depends_on = [ kubernetes_config_map.install_tools ]
+  depends_on = [ kubernetes_secret.config_hlf_env]
 }
 
 resource "kubectl_manifest" "toolbox_container" {

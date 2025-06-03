@@ -1,7 +1,6 @@
 amends "./hlf.pkl"
 
-Orgs = new {"ca-org1" "ca-ord"}
-
+// TO DO: adjust examples
 CA {
   // change values ./hlf.pkl
   // [0] = new {

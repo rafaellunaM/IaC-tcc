@@ -1,7 +1,5 @@
 module hfl_resources
 
-Orgs: Listing<String> = new  {}
-
 typealias CaConfig =
   "capacity"
   | "name"
@@ -59,6 +57,9 @@ typealias ChannelsConfig =
   | "namespace"
   | "caNameTls"
   | "caName"
+  | "hosts"             
+  | "orderNodeHost"     
+  | "ordererNodeEndpoint"
   | "fileOutput"
   | "fileOutputTls"
 
@@ -132,18 +133,21 @@ Orderer: Listing<Mapping<OrderConfig, String>> = new {
 Channel: Listing<Mapping<ChannelsConfig, String>> = new {
   //OrdererMSP 
   new {
-    ["name"]        = "ord-ca"
-    ["userAdmin"]   = "admin"
-    ["secretadmin"] = "adminpw"
-    ["userType"]    = "admin"
-    ["enrollID"]    = "enroll"
-    ["enrollPW"]    = "enrollpw"
-    ["mspID"]       = "OrdererMSP"
-    ["namespace"]   = "default"
-    ["caNameTls"]   = "tlsca"
-    ["caName"]      = "ca"
-    ["fileOutput"]    = "orderermspsign.yaml"
-    ["fileOutputTls"] = "orderermsp.yaml"
+    ["name"]                = "ord-ca"
+    ["userAdmin"]           = "admin"
+    ["secretadmin"]         = "adminpw"
+    ["userType"]            = "admin"
+    ["enrollID"]            = "enroll"
+    ["enrollPW"]            = "enrollpw"
+    ["mspID"]               = "OrdererMSP"
+    ["namespace"]           = "default"
+    ["caNameTls"]           = "tlsca"
+    ["caName"]              = "ca"
+    ["hosts"]               = "orderer0-ord.localho.st"
+    ["orderNodeHost"]       = "ord-node1.default"
+    ["ordererNodeEndpoint"] = "orderer0-ord.localho.st"
+    ["fileOutput"]          = "orderermspsign.yaml"
+    ["fileOutputTls"]       = "orderermsp.yaml"
   }
   //Org1MSP 
   new {

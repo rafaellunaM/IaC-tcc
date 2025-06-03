@@ -1,27 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ubuntu-deployment
+  name: hlf-toolbox-deployment
   labels:
-    app: ubuntu
+    app: hlf-toolbox
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ubuntu
+      app: hlf-toolbox
   template:
     metadata:
       labels:
-        app: ubuntu
+        app: hlf-toolbox
     spec:
       containers:
-        # Set a tag and use ubuntu minimal to toolbox
-      - name: ubuntu
-        image: ubuntu
+      - name: hlf-toolbox
+        image: rafaelluna2410/hlf-toolbox
         command: ["sh", "-c", "echo 'Container started'; sleep infinity"]
         envFrom:
         - secretRef:
-              name: config-hlf-env
+            name: config-hlf-env
         volumeMounts:
           - name: script-volume
             mountPath: /install-tools

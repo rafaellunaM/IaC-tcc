@@ -1,4 +1,7 @@
 {
+  "OrgsPeers": [
+    "Org1MSP"
+  ],
   "CA": [
     {
       "capacity": "1Gi",
