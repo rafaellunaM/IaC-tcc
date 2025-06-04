@@ -17,8 +17,8 @@ spec:
       containers:
       - name: hlf-toolbox
         image: rafaelluna2410/hlf-toolbox
-        #command: ["sh", "-c", "/install-hlf/istio-coredns.sh; /install-hlf/hlf-auto.sh; sleep infinity"]
-        command: ["sh", "-c", "/install-hlf/hlf-auto.sh; sleep infinity"]
+        command: ["sh", "-c", "/install-hlf/istio-coredns.sh; /install-hlf/hlf-auto.sh; sleep infinity"]
+        #command: ["sh", "-c", "/install-hlf/hlf-auto.sh; sleep infinity"]
         envFrom:
         - secretRef:
               name: config-hlf-env
