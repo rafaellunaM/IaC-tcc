@@ -14,3 +14,6 @@ local_provider:
 
 hlf_render:
 	pkl eval -f json hlf/set-hlf.pkl > terraform/modules/deployments/files/hlf-config.json
+
+hlf_acces:
+	kubectl exec -it pods/hlf-toolbox-deployment-0 -- /bin/bash

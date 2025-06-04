@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: hlf-toolbox-deployment
   labels:
@@ -17,24 +17,16 @@ spec:
       containers:
       - name: hlf-toolbox
         image: rafaelluna2410/hlf-toolbox
-        command: ["sh", "-c", "echo 'Container started'; sleep infinity"]
+        #command: ["sh", "-c", "/install-hlf/istio-coredns.sh; /install-hlf/hlf-auto.sh; sleep infinity"]
+        command: ["sh", "-c", "/install-hlf/hlf-auto.sh; sleep infinity"]
         envFrom:
         - secretRef:
-            name: config-hlf-env
+              name: config-hlf-env
         volumeMounts:
-          - name: script-volume
-            mountPath: /install-tools
-          - name: aws-env-volume
-            mountPath: /aws-vars
           - name: hlf-volume
             mountPath: /install-hlf
       volumes:
-        - name: script-volume
-          configMap:
-            name: install-tools
-        - name: aws-env-volume
-          secret:
-            secretName: aws-env
         - name: hlf-volume
           configMap:
             name: install-hlf
+            defaultMode: 0755

@@ -55,9 +55,8 @@ resource "kubernetes_config_map" "install_HLF" {
     name = "install-hlf"
   }
   data = {
-    "aws-config.sh" = "${file("${path.module}/scripts/aws-config.sh")}"
-    "install-istio.sh" = "${file("${path.module}/scripts/install-istio.sh")}"
-    "config-coreDns.sh" = "${file("${path.module}/scripts/config-coreDns.sh")}"
+    "hlf-auto.sh" = "${file("${path.module}/scripts/hlf-auto.sh")}"
+    "istio-coredns.sh" = "${file("${path.module}/scripts/istio-coredns.sh")}"
     "output.json" = "${file("${path.module}/files/hlf-config.json")}"
   }
   depends_on = [ kubernetes_secret.config_hlf_env]
