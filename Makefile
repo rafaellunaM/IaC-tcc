@@ -15,5 +15,7 @@ local_provider:
 hlf_render:
 	pkl eval -f json hlf/set-hlf.pkl > terraform/modules/deployments/files/hlf-config.json
 
-hlf_acces:
-	kubectl exec -it pods/hlf-toolbox-deployment-0 -- /bin/bash
+hlf_access:
+	kubectl exec -it pods/hlf-toolbox-deployment-0 -- bash -c "cd hlf-module-tcc && exec bash"
+
+# kubectl exec -it pods/hlf-toolbox-deployment-0 -- bash -c "go run -C hlf-module-tcc main.go"
