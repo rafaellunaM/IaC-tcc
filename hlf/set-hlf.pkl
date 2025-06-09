@@ -1,101 +1,30 @@
-amends "./hlf.pkl"
+module config
 
-// TO DO: adjust examples
-CA {
-  // change values ./hlf.pkl
-  // [0] = new {
-  //   ["capacity"] = "1Gi"
-  //   ["name"] = "org1-ca"
-  //   ["enrollId"] = "enroll"
-  //   ["enrollPw"] = "enrollpw"
-  //   ["hosts"] = "org1-ca.localho.st"
-  //   ["istioPort"] = "443"
-  //   ["user"] = "peer"
-  //   ["secret"] = "peerpw"
-  //   ["userType"] = "peer"
-  //   ["mspID"] = "Org1MSP"
-  // }
+// channelName: String = "demo"
 
-  // [1] = new {
-  //   ["capacity"] = "1Gi"
-  //   ["name"] = "ord-ca"
-  //   ["enrollId"] = "enroll"
-  //   ["enrollPw"] = "enrollpw"
-  //   ["hosts"] = "ord-ca.localho.st"
-  //   ["istioPort"] = "443"
-  //   ["user"] = "orderer"
-  //   ["secret"] = "ordererpw"
-  //   ["userType"] = "orderer"
-  //   ["mspID"] = "OrdererMSP"
-  // }
+// peersPerOrg: Int = 2
+// orgs: List<String> = List("org1")
 
-  // add new peer
-  //  new {
-  //   ["capacity"] = ""
-  //   ["name"] = ""
-  //   ["enrollId"] = ""
-  //   ["enrollPw"] = ""
-  //   ["hosts"] = ""
-  //   ["istioPort"] = ""
-  // }
-}
+// ords: List<String> = List("ord")
+// numOrderers: Int = 1
+// ordererNodes: List<String> = List("ord-node1")
 
-Peers {
-  // change values ./hlf.pkl
-  // [0] = new{
-  // ["enrollId"] = "peer"
-  // ["mspid"] = "Org1MSP"
-  // ["enrollPw"] = "peerpw"
-  // ["capacity"] = "5Gi"
-  // ["name"] = "org1-peer0"
-  // ["ca-name"] = "org1-ca.default"
-  // ["hosts"] = "peer0-org1.localho.st"
-  // ["istioPort"] = "443"
-  // } 
 
-  // add new peer
-  //new{
-  // ["enrollId"] = ""
-  // ["mspid"] = ""
-  // ["enrollPw"] = ""
-  // ["capacity"] = ""
-  // ["name"] = ""
-  // ["ca-name"] = ""
-  // ["hosts"] = ""
-  // ["istioPort"] = ""
-  // } 
-}
+// channelName: String = "demo"
 
-Orderer {
-  //change values ./hlf.pkl
-  //[0] =  new {
-  // ["enrollId"] = "orderer"
-  // ["mspid"] = "OrdererMSP"
-  // ["enrollPw"] = "ordererpw"
-  // ["capacity"] = "2Gi"
-  // ["name"] = "ord-node-1"
-  // ["ca-name"] = "ord-ca.default"
-  // ["hosts"] = "orderer1-ord.localho.st"
-  // ["admin-hosts"] = "admin-orderer1-ord.localho.st"
-  // ["istioPort"] = "443"
-  // ["user"] = "orderer"
-  // ["secret"] = "ordererpw"
-  // ["userType"] = "orderer"
-  // ["caURL"] = "https://ord-ca.localho.st:443"
-  // }
-  
-  // add new orderer
-  // new {
-  //   ["enrollId"] = ""
-  //   ["mspid"] = ""
-  //   ["enrollPw"] = ""
-  //   ["capacity"] = ""
-  //   ["name"] = ""
-  //   ["ca-name"] = ""
-  //   ["hosts"] = ""
-  //   ["admin-hosts"] = ""
-  //   ["istioPort"] = ""
-  // }
-}
+// peersPerOrg: Int = 1
+// orgs: List<String> = List("org1")
 
-Channel{}
+// ords: List<String> = List("ord")
+// numOrderers: Int = 1
+// ordererNodes: List<String> = List("ord-node1", "ord-node2", "ord-node3", "ord-node4" )
+
+
+channelName: String = "demo"
+
+peersPerOrg: Int = 2
+orgs: List<String> = List("org1", "org2")
+
+ords: List<String> = List("ord")
+numOrderers: Int = 1
+ordererNodes: List<String> = List("ord-node1")
