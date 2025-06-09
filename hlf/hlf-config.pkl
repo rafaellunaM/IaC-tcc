@@ -1,0 +1,285 @@
+module Fabric
+
+import "./set-hlf.pkl" as _cfg
+
+class CertificateAuthority {
+  capacity: String
+  name: String
+  enrollId: String
+  enrollPw: String
+  hosts: String
+  istioPort: String
+  user: String
+  secret: String
+  userType: "peer" | "orderer"
+  mspID: String
+}
+
+class Peer {
+  stateDB: String
+  enrollIDpeer: String
+  mspid: String
+  enrollIPWpeer: String
+  capacity: String
+  name: String
+  CAName: String
+  hosts: String
+  istioPort: String
+  user: String
+  enrollId: String
+  enrollPw: String
+  secret: String
+  userType: String
+}
+
+class OrdererNode {
+  CAName: String
+  user: String
+  secret: String
+  userType: String
+  enrollID: String
+  enrollPW: String
+  mspid: String
+  caURL: String
+  capacity: String
+  name: String
+  istioPort: String
+  enrollIDorderer: String
+  enrollPWorderer: String
+  `ca-name-service`: String
+  hosts: String
+  `admin-hosts`: String
+}
+
+class ChannelConfig {
+  name: String
+  userAdmin: String
+  secretadmin: String
+  userType: String
+  enrollID: String
+  enrollPW: String
+  mspID: String
+  namespace: String
+  caNameTls: String
+  caName: String
+  fileOutput: String
+  fileOutputTls: String
+
+  hosts: String?
+  orderNodeHost: String?
+  ordererNodesList: Listing<String>?
+  ordererNodeEndpoint: Listing<String>?
+}
+
+
+class JoinChannel {
+  namespace: String
+  mspID: Listing<String>
+  fileOutputTls: Listing<String>
+  fabricChannelFollower: Listing<String>
+  peersToJoin: Listing<Listing<String>>
+  anchorPeers: Listing<Listing<String>>
+  orderNodeHost: Listing<Listing<String>>
+  ordererNodesList: Listing<Listing<String>>
+}
+
+local basePeerCA: CertificateAuthority = new {
+  capacity = "1Gi"
+  enrollId = "enroll"
+  enrollPw = "enrollpw"
+  istioPort = "443"
+  user = "peer"
+  secret = "peerpw"
+  userType = "peer"
+}
+
+local baseOrdererCA: CertificateAuthority = new {
+  capacity = "1Gi"
+  enrollId = "enroll"
+  enrollPw = "enrollpw"
+  istioPort = "443"
+  user = "orderer"
+  secret = "ordererpw"
+  userType = "orderer"
+}
+
+CA = new Listing {
+  for (ord in _cfg.ords){
+    (baseOrdererCA) {
+    name = "\(ord)-ca"
+    hosts = "\(ord)-ca.localho.st"
+    mspID = "\(ord.capitalize())ererMSP"
+    }
+  }
+  for (org in _cfg.orgs) {
+    (basePeerCA) {
+      name = "\(org)-ca"
+      hosts = "\(org)-ca.localho.st"
+      mspID = "\(org.capitalize())MSP"
+    }
+  }
+}
+
+
+local basePeer: Peer = new {
+  stateDB = "leveldb"
+  enrollIPWpeer = "peerpw"
+  capacity = "5Gi"
+  istioPort = "443"
+  enrollId = "enroll"
+  enrollPw = "enrollpw"
+  secret = "peerpw"
+  userType = "peer"
+}
+
+Peers = new Listing {
+  for (org in _cfg.orgs) {
+    for (peerNum in IntSeq(1, _cfg.peersPerOrg)) {
+      (basePeer) {
+        enrollIDpeer = "\(org)-peer\(peerNum)"
+        mspid = "\(org.capitalize())MSP"
+        name = "\(org)-peer\(peerNum)"
+        CAName = "\(org)-ca"
+        hosts = "peer\(peerNum)-\(org).localho.st"
+        user = "\(org)-peer\(peerNum)"
+      }
+    }
+  }
+}
+
+local baseOrderer: OrdererNode = new {
+  CAName = "ord-ca"
+  user = "orderer"
+  secret = "ordererpw"
+  userType = "orderer"
+  enrollID = "enroll"
+  enrollPW = "enrollpw"
+  mspid = "OrdererMSP"
+  caURL = "https://ord-ca.localho.st:443"
+  capacity = "2Gi"
+  istioPort = "443"
+  enrollIDorderer = "orderer"
+  enrollPWorderer = "ordererpw"
+  `ca-name-service` = "ord-ca.default"
+}
+
+Orderer = new Listing {
+  for (ordNum in IntSeq(1, _cfg.numOrderers)) {
+    (baseOrderer) {
+      name = "ord-node\(ordNum)"
+      hosts = "orderer\(ordNum - 1)-ord.localho.st"
+      `admin-hosts` = "admin-orderer\(ordNum - 1)-ord.localho.st"
+    }
+  }
+}
+
+local baseChannelConfig: ChannelConfig = new {
+  userAdmin = "admin"
+  secretadmin = "adminpw"
+  userType = "admin"
+  enrollID = "enroll"
+  enrollPW = "enrollpw"
+  namespace = "default"
+  caNameTls = "tlsca"
+  caName = "ca"
+}
+
+function generateOrdererEndpoints(nodes: List<String>): Listing<String> = 
+  new Listing {
+    for (idx, node in nodes) {
+      "orderer\(idx)-ord.localho.st:443"
+    }
+  }
+
+Channel = new Listing {
+  (baseChannelConfig) {
+    name = "ord-ca"
+    mspID = "OrdererMSP"
+    hosts = "orderer0-ord.localho.st"
+    orderNodeHost = "\(_cfg.ordererNodes[0]).default"
+    ordererNodesList = new Listing {
+      for (node in _cfg.ordererNodes) {
+        node
+      }
+    }
+    ordererNodeEndpoint = generateOrdererEndpoints(_cfg.ordererNodes)
+    fileOutput = "orderermspsign.yaml"
+    fileOutputTls = "orderermsp.yaml"
+  }
+
+  for (org in _cfg.orgs) {
+    (baseChannelConfig) {
+      name = "\(org)-ca"
+      mspID = "\(org.capitalize())MSP"
+      fileOutput = "\(org)msp.yaml"
+      fileOutputTls = "\(org)msp-tlsca.yaml"
+    }
+  }
+}
+
+function generatePeerNames(org: String, numPeers: Int): Listing<String> = 
+  new Listing {
+    for (peerNum in IntSeq(1, numPeers)) {
+      "\(org)-peer\(peerNum)"
+    }
+  }
+
+function generateAnchorPeers(org: String, numPeers: Int): Listing<String> = 
+  new Listing {
+    for (peerNum in IntSeq(1, numPeers)) {
+      "peer\(peerNum)-\(org).localho.st"
+    }
+  }
+
+joinChannel = new Listing {
+  new JoinChannel {
+    namespace = "default"
+    
+    mspID = new Listing {
+      for (org in _cfg.orgs) {
+        "\(org.capitalize())MSP"
+      }
+    }
+    fileOutputTls = new Listing {
+      for (org in _cfg.orgs) {
+        "\(org)msp.yaml"
+      }
+    }
+    fabricChannelFollower = new Listing {
+      "\(_cfg.channelName)-peers"
+    }
+    peersToJoin = new Listing {
+      for (org in _cfg.orgs) {
+        generatePeerNames(org, _cfg.peersPerOrg)
+      }
+    }
+    anchorPeers = new Listing {
+      for (org in _cfg.orgs) {
+        generateAnchorPeers(org, _cfg.peersPerOrg)
+      }
+    }
+    orderNodeHost = new Listing {
+      new Listing {
+        for (idx, node in _cfg.ordererNodes) {
+          "grpcs://\(node).default:7050"
+        }
+      }
+    }
+    ordererNodesList = new Listing {
+      new Listing {
+        for (node in _cfg.ordererNodes) {
+          node
+        }
+      }
+    }
+  }
+}
+
+// local _cfg.channelName = "demo"
+
+// local _cfg.peersPerOrg = 2
+// local _cfg.orgs = List("org1", "org2")
+
+// local ords = List("ord")
+// local _cfg.numOrderers = 1
+// local ordererNodes = List("ord-node1")

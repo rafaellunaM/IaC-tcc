@@ -2,6 +2,18 @@
   "CA": [
     {
       "capacity": "1Gi",
+      "name": "ord-ca",
+      "enrollId": "enroll",
+      "enrollPw": "enrollpw",
+      "hosts": "ord-ca.localho.st",
+      "istioPort": "443",
+      "user": "orderer",
+      "secret": "ordererpw",
+      "userType": "orderer",
+      "mspID": "OrdererMSP"
+    },
+    {
+      "capacity": "1Gi",
       "name": "org1-ca",
       "enrollId": "enroll",
       "enrollPw": "enrollpw",
@@ -14,29 +26,77 @@
     },
     {
       "capacity": "1Gi",
-      "name": "ord-ca",
+      "name": "org2-ca",
       "enrollId": "enroll",
       "enrollPw": "enrollpw",
-      "hosts": "ord-ca.localho.st",
+      "hosts": "org2-ca.localho.st",
       "istioPort": "443",
-      "user": "orderer",
-      "secret": "ordererpw",
-      "userType": "orderer",
-      "mspID": "OrdererMSP"
+      "user": "peer",
+      "secret": "peerpw",
+      "userType": "peer",
+      "mspID": "Org2MSP"
     }
   ],
   "Peers": [
     {
       "stateDB": "leveldb",
-      "enrollIDpeer": "peer",
+      "enrollIDpeer": "org1-peer1",
       "mspid": "Org1MSP",
       "enrollIPWpeer": "peerpw",
       "capacity": "5Gi",
-      "name": "org1-peer0",
+      "name": "org1-peer1",
       "CAName": "org1-ca",
-      "hosts": "peer0-org1.localho.st",
+      "hosts": "peer1-org1.localho.st",
       "istioPort": "443",
-      "user": "peer",
+      "user": "org1-peer1",
+      "enrollId": "enroll",
+      "enrollPw": "enrollpw",
+      "secret": "peerpw",
+      "userType": "peer"
+    },
+    {
+      "stateDB": "leveldb",
+      "enrollIDpeer": "org1-peer2",
+      "mspid": "Org1MSP",
+      "enrollIPWpeer": "peerpw",
+      "capacity": "5Gi",
+      "name": "org1-peer2",
+      "CAName": "org1-ca",
+      "hosts": "peer2-org1.localho.st",
+      "istioPort": "443",
+      "user": "org1-peer2",
+      "enrollId": "enroll",
+      "enrollPw": "enrollpw",
+      "secret": "peerpw",
+      "userType": "peer"
+    },
+    {
+      "stateDB": "leveldb",
+      "enrollIDpeer": "org2-peer1",
+      "mspid": "Org2MSP",
+      "enrollIPWpeer": "peerpw",
+      "capacity": "5Gi",
+      "name": "org2-peer1",
+      "CAName": "org2-ca",
+      "hosts": "peer1-org2.localho.st",
+      "istioPort": "443",
+      "user": "org2-peer1",
+      "enrollId": "enroll",
+      "enrollPw": "enrollpw",
+      "secret": "peerpw",
+      "userType": "peer"
+    },
+    {
+      "stateDB": "leveldb",
+      "enrollIDpeer": "org2-peer2",
+      "mspid": "Org2MSP",
+      "enrollIPWpeer": "peerpw",
+      "capacity": "5Gi",
+      "name": "org2-peer2",
+      "CAName": "org2-ca",
+      "hosts": "peer2-org2.localho.st",
+      "istioPort": "443",
+      "user": "org2-peer2",
       "enrollId": "enroll",
       "enrollPw": "enrollpw",
       "secret": "peerpw",
@@ -61,60 +121,6 @@
       "ca-name-service": "ord-ca.default",
       "hosts": "orderer0-ord.localho.st",
       "admin-hosts": "admin-orderer0-ord.localho.st"
-    },
-    {
-      "CAName": "ord-ca",
-      "user": "orderer",
-      "secret": "ordererpw",
-      "userType": "orderer",
-      "enrollID": "enroll",
-      "enrollPW": "enrollpw",
-      "mspid": "OrdererMSP",
-      "caURL": "https://ord-ca.localho.st:443",
-      "capacity": "2Gi",
-      "name": "ord-node2",
-      "istioPort": "443",
-      "enrollIDorderer": "orderer",
-      "enrollPWorderer": "ordererpw",
-      "ca-name-service": "ord-ca.default",
-      "hosts": "orderer1-ord.localho.st",
-      "admin-hosts": "admin-orderer1-ord.localho.st"
-    },
-    {
-      "CAName": "ord-ca",
-      "user": "orderer",
-      "secret": "ordererpw",
-      "userType": "orderer",
-      "enrollID": "enroll",
-      "enrollPW": "enrollpw",
-      "mspid": "OrdererMSP",
-      "caURL": "https://ord-ca.localho.st:443",
-      "capacity": "2Gi",
-      "name": "ord-node3",
-      "istioPort": "443",
-      "enrollIDorderer": "orderer",
-      "enrollPWorderer": "ordererpw",
-      "ca-name-service": "ord-ca.default",
-      "hosts": "orderer2-ord.localho.st",
-      "admin-hosts": "admin-orderer2-ord.localho.st"
-    },
-    {
-      "CAName": "ord-ca",
-      "user": "orderer",
-      "secret": "ordererpw",
-      "userType": "orderer",
-      "enrollID": "enroll",
-      "enrollPW": "enrollpw",
-      "mspid": "OrdererMSP",
-      "caURL": "https://ord-ca.localho.st:443",
-      "capacity": "2Gi",
-      "name": "ord-node4",
-      "istioPort": "443",
-      "enrollIDorderer": "orderer",
-      "enrollPWorderer": "ordererpw",
-      "ca-name-service": "ord-ca.default",
-      "hosts": "orderer3-ord.localho.st",
-      "admin-hosts": "admin-orderer3-ord.localho.st"
     }
   ],
   "Channel": [
@@ -129,11 +135,16 @@
       "namespace": "default",
       "caNameTls": "tlsca",
       "caName": "ca",
+      "fileOutput": "orderermspsign.yaml",
+      "fileOutputTls": "orderermsp.yaml",
       "hosts": "orderer0-ord.localho.st",
       "orderNodeHost": "ord-node1.default",
-      "ordererNodeEndpoint": "orderer0-ord.localho.st",
-      "fileOutput": "orderermspsign.yaml",
-      "fileOutputTls": "orderermsp.yaml"
+      "ordererNodesList": [
+        "ord-node1"
+      ],
+      "ordererNodeEndpoint": [
+        "orderer0-ord.localho.st:443"
+      ]
     },
     {
       "name": "org1-ca",
@@ -148,6 +159,66 @@
       "caName": "ca",
       "fileOutput": "org1msp.yaml",
       "fileOutputTls": "org1msp-tlsca.yaml"
+    },
+    {
+      "name": "org2-ca",
+      "userAdmin": "admin",
+      "secretadmin": "adminpw",
+      "userType": "admin",
+      "enrollID": "enroll",
+      "enrollPW": "enrollpw",
+      "mspID": "Org2MSP",
+      "namespace": "default",
+      "caNameTls": "tlsca",
+      "caName": "ca",
+      "fileOutput": "org2msp.yaml",
+      "fileOutputTls": "org2msp-tlsca.yaml"
+    }
+  ],
+  "joinChannel": [
+    {
+      "namespace": "default",
+      "mspID": [
+        "Org1MSP",
+        "Org2MSP"
+      ],
+      "fileOutputTls": [
+        "org1msp.yaml",
+        "org2msp.yaml"
+      ],
+      "fabricChannelFollower": [
+        "demo-peers"
+      ],
+      "peersToJoin": [
+        [
+          "org1-peer1",
+          "org1-peer2"
+        ],
+        [
+          "org2-peer1",
+          "org2-peer2"
+        ]
+      ],
+      "anchorPeers": [
+        [
+          "peer1-org1.localho.st",
+          "peer2-org1.localho.st"
+        ],
+        [
+          "peer1-org2.localho.st",
+          "peer2-org2.localho.st"
+        ]
+      ],
+      "orderNodeHost": [
+        [
+          "grpcs://ord-node1.default:7050"
+        ]
+      ],
+      "ordererNodesList": [
+        [
+          "ord-node1"
+        ]
+      ]
     }
   ]
 }
